@@ -1,0 +1,7 @@
+{
+  "name": "SocialFitness",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
