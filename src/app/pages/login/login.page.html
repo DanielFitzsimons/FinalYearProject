@@ -1,0 +1,34 @@
+<ion-content>
+
+    <div>
+      <ion-title>
+        Welcome!
+      </ion-title>
+    </div>
+
+    <form>
+      <div class="ion-padding">
+        <ion-item>
+          <ion-input placeholder="username"></ion-input>
+          <ion-icon name="person-outline"></ion-icon>
+        </ion-item>
+        <ion-item>
+          <ion-input placeholder="password"></ion-input>
+          <ion-icon name="lock-closed-outline"></ion-icon>
+        </ion-item>
+        <div>
+          <p>Not a member? <a [routerLink]="['/sign-up']">Sign up</a></p>
+        </div>
+        <div>
+          <a>Forgot password?</a>
+        </div>
+
+      </div>
+      <ion-fab vertical="bottom" horizontal="end" style="margin-bottom: 30px ;">
+        <ion-fab-button [routerLink]="['/home']">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </form>
+</ion-content>
+

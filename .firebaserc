@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "socialfitness-cfe71": {
+      "hosting": {
+        "app": [
+          "socialfitness-cfe71"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "socialfitness-cfe71"
+  }
+}
