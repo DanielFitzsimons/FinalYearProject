@@ -8,12 +8,15 @@ import { LandingPageRoutingModule } from './landing-routing.module';
 
 import { LandingPage } from './landing.page';
 
+import { MatDialogModule } from '@angular/material/dialog';
+
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    LandingPageRoutingModule
+    LandingPageRoutingModule,
+    MatDialogModule
   ],
   declarations: [LandingPage]
 })

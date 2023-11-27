@@ -4,13 +4,34 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+    loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule)
   },
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'landing',
     pathMatch: 'full'
   },
+  {
+    path: 'landing',
+    loadChildren: () => import('./pages/landing/landing.module').then( m => m.LandingPageModule)
+  },
+  {
+    path: 'tasks',
+    loadChildren: () => import('./tasks/tasks.module').then( m => m.TasksPageModule)
+  },
+  {
+    path: 'authenticator',
+    loadChildren: () => import('./pages/authenticator/authenticator.module').then( m => m.AuthenticatorPageModule)
+  },
+  {
+    path: 'profile',
+    loadChildren: () => import('./tools/profile/profile.module').then( m => m.ProfilePageModule)
+  },
+  {
+    path: 'create-post',
+    loadChildren: () => import('./pages/create-post/create-post.module').then( m => m.CreatePostPageModule)
+  },
+  
 ];
 
 @NgModule({

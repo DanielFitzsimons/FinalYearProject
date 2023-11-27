@@ -1,15 +1,3 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-button (click)="logout()"></ion-button>
-        <ion-icon slot ="icon-only" name="log-out-outline"></ion-icon>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-
-
-
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
@@ -17,6 +5,9 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-button (click)="onCreatePostClick()"  id="post-button"></ion-button>
+  <ion-button (click)="onCreatePostClick()"  id="post-button"><ion-icon name="chevron-forward-circle-outline">
+    
+  </ion-icon>
+  </ion-button>
 
 </ion-content>

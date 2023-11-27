@@ -12,6 +12,10 @@
     width: 100%;
     max-width: 30em;
     padding: 1.5em;
+    max-width: 400px; /* Set the maximum width of the card */
+    margin: auto; /* Center the card horizontally */
+    margin-top: 25%; /* Center the card vertically */
+    transform: translateY(-50%); /* Adjust for vertical centering */
 
 }
 

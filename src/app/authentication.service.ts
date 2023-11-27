@@ -12,6 +12,7 @@ import { doc, Firestore, setDoc } from '@angular/fire/firestore';
 })
 export class AuthenticationService {
 
+  private isAuthenticated: boolean = false;
   constructor(private auth:Auth, private firestore: Firestore) { }
 
   async register({email, password}: {email:string, password: string}){
@@ -21,12 +22,48 @@ export class AuthenticationService {
         email,
         password
       );
-      const ref = doc(this.firestore, 'users/${credentials.user.id');
+      const ref = doc(this.firestore, `users/${credentials.user.uid}`);
       setDoc(ref, {email});
+      this.isAuthenticated = true;
       return credentials;
     }catch(e){
       console.log("Error registering: ", e);
+      this.isAuthenticated = false;
       return null;
     }
+  }
+
+  async login({ email, password }: { email: string, password: string }) {
+    try {
+      const credentials = await signInWithEmailAndPassword(this.auth, email, password);
+  
+      console.log('Credentials:', credentials);
+      console.log('User:', credentials.user);
+  
+      if (credentials && credentials.user.uid) {
+        this.isAuthenticated = true;
+        return credentials.user;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      console.error('Error during login: ', e);
+      this.isAuthenticated = false;
+      return null;
+    }
+  }
+
+  resetPw(email: string) {
+    // Pass in athentication private and email address
+    return sendPasswordResetEmail(this.auth, email);
+  }
+
+  isAuthenticatedUser(){
+    return this.isAuthenticated;
+  }
+  
+
+  async logout(){
+    return signOut(this.auth);
   }
 }

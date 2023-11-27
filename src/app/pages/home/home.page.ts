@@ -9,6 +9,9 @@ import {
   LoadingController,
   AlertController,
 } from '@ionic/angular';
+import { CreatePostPage } from '../create-post/create-post.page';
+
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -31,7 +34,7 @@ export class HomePage {
   }
 
   onCreatePostClick(){
-    //this.dialog.open(CreatePostPage);
+    this.dialog.open(CreatePostPage);
   }
 
 }

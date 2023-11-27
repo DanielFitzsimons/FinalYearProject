@@ -1,14 +1,9 @@
 
+<ion-content>
 
-<ion-content [fullscreen]="true">
-  <ion-button [routerLink]="['/login']">
-   login
-  </ion-button>
-  <ion-button [routerLink]="['/sign-up']">
-    Sign Up
-  </ion-button>
-  <ion-button [routerLink]="['/tasks']">
-    Tasks
-  </ion-button>
- 
+  <div id="landing-page">
+  <h1>Welcome to Social Fitness</h1>
+  <ion-button (click)="onGetStarted()"
+  >Get Started</ion-button>
+</div>
 </ion-content>
