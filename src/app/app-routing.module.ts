@@ -25,7 +25,7 @@ const routes: Routes = [
   },
   {
     path: 'profile',
-    loadChildren: () => import('./tools/profile/profile.module').then( m => m.ProfilePageModule)
+    loadChildren: () => import('./pages/profile/profile.module').then( m => m.ProfilePageModule)
   },
   {
     path: 'create-post',

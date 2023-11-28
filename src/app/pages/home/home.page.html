@@ -1,13 +1,8 @@
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
 
+<ion-content>
   <ion-button (click)="onCreatePostClick()"  id="post-button"><ion-icon name="chevron-forward-circle-outline">
-    
   </ion-icon>
   </ion-button>
-
+  <ion-button routerLink="/profile">View Profile</ion-button>
+  <ion-button (click)="logout()">Logout</ion-button>
 </ion-content>

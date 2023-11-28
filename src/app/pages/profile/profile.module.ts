@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { IonicModule } from '@ionic/angular';
-
+import { FirebaseAppModule } from '@angular/fire/app';
 import { ProfilePageRoutingModule } from './profile-routing.module';
 
 import { ProfilePage } from './profile.page';
@@ -17,6 +17,8 @@ import { ProfilePage } from './profile.page';
     IonicModule,
     ProfilePageRoutingModule,
     MatButtonModule,
+    FirebaseAppModule, 
+    ReactiveFormsModule
   ],
   declarations: [ProfilePage]
 })

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { AuthenticationService } from 'src/app/authentication.service';
+import { AuthenticationService } from 'src/app/services/authentication.service';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
@@ -17,6 +17,7 @@ export class AuthenticatorPage implements OnInit {
   credentials = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    name: ['', Validators.required],
   });
 
   constructor(
@@ -57,9 +58,10 @@ export class AuthenticatorPage implements OnInit {
 
     // If the user is successfully created, redirect to the home page. Otherwise, display an error.
     if (user) {
-      this.router.navigateByUrl('/home', { replaceUrl: true });
+      this.router.navigateByUrl('/profile', { replaceUrl: true });
       this.dialogRef.close();
     } else {
+      this.dialogRef.close();
       this.showAlert('Registration failed', 'Please try again!');
     }
 
@@ -79,6 +81,7 @@ export class AuthenticatorPage implements OnInit {
       this.router.navigateByUrl('/home', { replaceUrl: true });
       this.dialogRef.close();
     } else {
+      this.dialogRef.close();
       this.showAlert('Login failed', 'Please try again!');
     }
 
@@ -139,12 +142,28 @@ export class AuthenticatorPage implements OnInit {
 
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
+      cssClass: 'top-alert', // Custom CSS class for positioning
       header,
       message,
       buttons: ['OK'],
     });
+     // Add CSS rule for 'top-alert' class
+      const style = document.createElement('style');
+      style.textContent = `
+        .top-alert {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 9999;
+        }
+      `;
+      document.head.appendChild(style);
+
     await alert.present();
   }
+
+  
 
 }
 

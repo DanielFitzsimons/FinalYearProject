@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Profile
+    </ion-title>
+    <ion-button routerLink="/home">Home</ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="profileForm">
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input formControlName="email" [value]="user?.email" ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Name</ion-label>
+      <ion-input formControlName="name"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Age</ion-label>
+      <ion-input formControlName="age"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Phone Number</ion-label>
+      <ion-input formControlName="phoneNumber"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Address</ion-label>
+      <ion-input formControlName="address"></ion-input>
+    </ion-item>
+
+  
+    <ion-button type="submit" expand="full" (click)="onUpdate()">Update</ion-button>
+    <ion-button type="button" expand="full" (click)="onDelete('name')">Delete Name</ion-button>
+    <ion-button type="button" expand="full" (click)="onDelete('age')">Delete Age</ion-button>
+    <ion-button type="button" expand="full" (click)="onDelete('phoneNumber')">Delete Number</ion-button>
+    <ion-button type="button" expand="full" (click)="onDelete('address')">Delete Address</ion-button>
+  </form>
+
+  <ng-container *ngIf="userProfileData$ | async as userProfiles">/
+    <ion-button *ngIf="userProfiles.length"
+                expand="full" (click)="showProfileData = !showProfileData">
+      {{ showProfileData ? 'Hide Profile Data' : 'Show Profile Data' }}
+    </ion-button>
+
+    <ng-container *ngIf="showProfileData">
+      <ion-list>
+        <ion-item *ngFor="let profile of userProfiles">
+          <ion-label>Email: {{ user?.email }}</ion-label>
+          <ion-label>Name: {{ profile['name'] }}</ion-label>
+          <ion-label>Age: {{ profile['age'] }}</ion-label>
+          <ion-label>Phone Number: {{ profile['phoneNumber'] }}</ion-label>
+          <ion-label>Address: {{ profile['address'] }}</ion-label>
+        </ion-item>
+      </ion-list>
+    </ng-container>
+  </ng-container>
+</ion-content>

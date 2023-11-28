@@ -6,16 +6,21 @@ import {
   signInWithEmailAndPassword, // Used to sign in a user with email and password.
   signOut, // Used to sign out a user.
 } from '@angular/fire/auth';
-import { doc, Firestore, setDoc } from '@angular/fire/firestore';
+import { doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
 
   private isAuthenticated: boolean = false;
+ 
+
   constructor(private auth:Auth, private firestore: Firestore) { }
 
-  async register({email, password}: {email:string, password: string}){
+
+
+  async register({ email, password, name,  }: { email: string, password: string, name: string, }) {
     try{
       const credentials = await createUserWithEmailAndPassword(
         this.auth,
@@ -23,6 +28,7 @@ export class AuthenticationService {
         password
       );
       const ref = doc(this.firestore, `users/${credentials.user.uid}`);
+      const userData = { email, name }; // Add additional user data
       setDoc(ref, {email});
       this.isAuthenticated = true;
       return credentials;
@@ -62,6 +68,23 @@ export class AuthenticationService {
     return this.isAuthenticated;
   }
   
+  getCurrentUser() {
+    // Ensure that user is authenticated before returning the user object
+    return this.auth.currentUser;
+  }
+  
+  // Existing code...
+
+  onUpdateProfileField(uid: string, field: string, value: any): Promise<void> {
+    const userProfileRef = doc(this.firestore, `users/${uid}`);
+    return updateDoc(userProfileRef, { [field]: value });
+  }
+
+  onDeleteProfileField(uid: string, field: string): Promise<void> {
+    const userProfileRef = doc(this.firestore, `users/${uid}`);
+    return updateDoc(userProfileRef, { [field]: null });
+  }
+
 
   async logout(){
     return signOut(this.auth);
