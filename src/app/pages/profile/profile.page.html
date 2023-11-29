@@ -7,6 +7,37 @@
   </ion-toolbar>
 </ion-header>
 
+<ng-container *ngIf="userProfileData$ | async as userProfiles">/
+  <ion-button *ngIf="userProfiles.length"
+              expand="full" (click)="showProfileData = !showProfileData">
+    {{ showProfileData ? 'Hide Profile Data' : 'Show Profile Data' }}
+  </ion-button>
+
+  <ng-container *ngIf="showProfileData">
+    <!-- Display user profile data on a card -->
+    <ion-card *ngFor="let profile of userProfiles">
+      <ion-card-header>
+        <ion-card-title>Email: {{ user?.email }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Stack the information vertically using <div> -->
+        <div>
+          <ion-label>Name: {{ profile['name'] }}</ion-label>
+        </div>
+        <div>
+          <ion-label>Age: {{ profile['age'] }}</ion-label>
+        </div>
+        <div>
+          <ion-label>Phone Number: {{ profile['phoneNumber'] }}</ion-label>
+        </div>
+        <div>
+          <ion-label>Address: {{ profile['address'] }}</ion-label>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ng-container>
+
 <ion-content>
   <form [formGroup]="profileForm">
     <ion-item>
@@ -42,22 +73,6 @@
     <ion-button type="button" expand="full" (click)="onDelete('address')">Delete Address</ion-button>
   </form>
 
-  <ng-container *ngIf="userProfileData$ | async as userProfiles">/
-    <ion-button *ngIf="userProfiles.length"
-                expand="full" (click)="showProfileData = !showProfileData">
-      {{ showProfileData ? 'Hide Profile Data' : 'Show Profile Data' }}
-    </ion-button>
 
-    <ng-container *ngIf="showProfileData">
-      <ion-list>
-        <ion-item *ngFor="let profile of userProfiles">
-          <ion-label>Email: {{ user?.email }}</ion-label>
-          <ion-label>Name: {{ profile['name'] }}</ion-label>
-          <ion-label>Age: {{ profile['age'] }}</ion-label>
-          <ion-label>Phone Number: {{ profile['phoneNumber'] }}</ion-label>
-          <ion-label>Address: {{ profile['address'] }}</ion-label>
-        </ion-item>
-      </ion-list>
-    </ng-container>
-  </ng-container>
+  
 </ion-content>

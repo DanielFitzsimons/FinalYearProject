@@ -4,10 +4,12 @@ import {
   createUserWithEmailAndPassword, // Used to create a user in Firebase auth.
   sendPasswordResetEmail, // Used to send a password reset email.
   signInWithEmailAndPassword, // Used to sign in a user with email and password.
-  signOut, // Used to sign out a user.
+  signOut,
+  user, // Used to sign out a user.
 } from '@angular/fire/auth';
 import { doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+import { LoadingController } from '@ionic/angular';
 @Injectable({
   providedIn: 'root'
 })
@@ -16,7 +18,7 @@ export class AuthenticationService {
   private isAuthenticated: boolean = false;
  
 
-  constructor(private auth:Auth, private firestore: Firestore) { }
+  constructor(private auth:Auth, private firestore: Firestore, private loadingController: LoadingController) { }
 
 
 
@@ -86,7 +88,27 @@ export class AuthenticationService {
   }
 
 
-  async logout(){
-    return signOut(this.auth);
+  async logout() {
+    try {
+      const currentUser = this.getCurrentUser();
+      const userEmail = currentUser ? currentUser.email : 'Unknown';
+  
+      const loading = await this.loadingController.create({
+        message: 'Logging out...',
+        spinner: 'crescent', // You can choose a different spinner if you want
+      });
+      await loading.present();
+  
+      await signOut(this.auth);
+      this.isAuthenticated = false;
+  
+      await loading.dismiss();
+  
+      console.log(`User with email ${userEmail} logged out successfully`);
+    } catch (error) {
+      console.error('Error during logout: ', error);
+    }
   }
+  
+  
 }

@@ -60,6 +60,7 @@ export class AuthenticatorPage implements OnInit {
     if (user) {
       this.router.navigateByUrl('/profile', { replaceUrl: true });
       this.dialogRef.close();
+      
     } else {
       this.dialogRef.close();
       this.showAlert('Registration failed', 'Please try again!');
