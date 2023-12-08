@@ -8,7 +8,6 @@ import {
   user, // Used to sign out a user.
 } from '@angular/fire/auth';
 import { doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 @Injectable({
   providedIn: 'root'

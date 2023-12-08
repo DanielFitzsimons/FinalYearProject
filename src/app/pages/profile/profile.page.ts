@@ -90,9 +90,43 @@ export class ProfilePage implements OnInit {
   }
 
   // Method to update user profile data
-  onUpdate() {
-    this.updateUserProfile(); // Call the method to update the user profile
-    //this.profileForm.reset(); // Reset the form after updating
+   onSave() {
+     this.updateUserProfile(); // Call the method to update the user profile
+     this.profileForm.reset(); // Reset the form after updating
+   }
+
+  onUpdate(fieldName: string) {
+    const fieldValue = this.profileForm.get(fieldName)?.value;
+
+    // Ensure that UID is defined and not empty
+    if (this.uid && fieldValue !== undefined) {
+      // Construct the document reference for the user profile
+      const userProfileRef = doc(this.firestore, `users/${this.uid}`);
+
+      // Fetch the existing user profile document
+      getDoc(userProfileRef).then((docSnap) => {
+        if (docSnap.exists()) {
+          // If the document exists, update the specified field
+          const updatedData = { [fieldName]: fieldValue };
+
+          // Use the updateDoc method to update the specified field
+          updateDoc(userProfileRef, updatedData)
+            .then(() => {
+              console.log(`Field '${fieldName}' updated successfully in user profile!`);
+              this.showProfileData = true; // Set flag to show profile data in the template
+            })
+            .catch((error) => {
+              console.error(`Error updating field '${fieldName}' in user profile: `, error);
+            });
+        } else {
+          console.error('User profile not found');
+        }
+      }).catch((error) => {
+        console.error('Error fetching user profile data: ', error);
+      });
+    } else {
+      console.error('User UID is undefined or null or field value is undefined.');
+    }
   }
 
    // onDelete() {
@@ -156,7 +190,7 @@ export class ProfilePage implements OnInit {
             });
         } else {
           console.error('User profile not found');
-        }
+        } 
       })
       .catch((error) => {
         console.error('Error fetching user profile data: ', error);
@@ -167,30 +201,21 @@ export class ProfilePage implements OnInit {
   }
 
   // Method to update user profile data in Firestore
-  updateUserProfile() {
-    // Check if the form is valid
-    if (this.profileForm.valid) {
-      const newProfile = this.profileForm.value; // Get the form values
+   updateUserProfile() {
+     // Check if the form is valid
+     if (this.profileForm.valid) {
+     const newProfile = this.profileForm.value; // Get the form values
 
-      // Use the DocumentReference to update the user's profile in Firestore
-      const userProfileRef = doc(this.firestore, `users/${this.uid}`);
-      updateDoc(userProfileRef, newProfile)
-        .then(() => {
-          console.log('User profile updated successfully!');
-          this.showProfileData = true; // Set flag to show profile data in the template after submission
-        })
+       // Use the DocumentReference to update the user's profile in Firestore
+       const userProfileRef = doc(this.firestore, `users/${this.uid}`);
+       updateDoc(userProfileRef, newProfile)
+         .then(() => {
+           console.log('User profile updated successfully!');
+           this.showProfileData = true; // Set flag to show profile data in the template after submission
+         })
         .catch((error) => {
           console.error('Error updating user profile: ', error);
-        });
-    }
+         });
+     }
   }
-}
-
-interface UserProfile {
-  email: string;
-  name: string;
-  age: number;
-  phoneNumber: string;
-  address: string;
-  // Add other fields as needed
 }

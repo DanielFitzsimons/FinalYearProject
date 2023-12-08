@@ -7,7 +7,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ng-container *ngIf="userProfileData$ | async as userProfiles">/
+<ng-container *ngIf="userProfileData$ | async as userProfiles">
   <ion-button *ngIf="userProfiles.length"
               expand="full" (click)="showProfileData = !showProfileData">
     {{ showProfileData ? 'Hide Profile Data' : 'Show Profile Data' }}
@@ -48,29 +48,36 @@
     <ion-item>
       <ion-label position="floating">Name</ion-label>
       <ion-input formControlName="name"></ion-input>
+      <ion-button type="button" expand="full" (click)="onUpdate('name')">Update Name</ion-button>
+      <ion-button type="button" expand="full" (click)="onDelete('name')">Delete Name</ion-button>
     </ion-item>
 
     <ion-item>
       <ion-label position="floating">Age</ion-label>
       <ion-input formControlName="age"></ion-input>
+      <ion-button type="button" expand="full" (click)="onUpdate('age')">Update Age</ion-button>
+      <ion-button type="button" expand="full" (click)="onDelete('age')">Delete Age</ion-button>
+
     </ion-item>
 
     <ion-item>
       <ion-label position="floating">Phone Number</ion-label>
       <ion-input formControlName="phoneNumber"></ion-input>
+      <ion-button type="button" expand="full" (click)="onUpdate('phoneNumber')">Update Number</ion-button>
+      <ion-button type="button" expand="full" (click)="onDelete('phoneNumber')">Delete Number</ion-button>
     </ion-item>
 
     <ion-item>
       <ion-label position="floating">Address</ion-label>
       <ion-input formControlName="address"></ion-input>
+      <ion-button type="button"  (click)="onUpdate('address')">Update Address</ion-button>
+      <ion-button type="button"  (click)="onDelete('address')">Delete Address</ion-button>
     </ion-item>
 
   
-    <ion-button type="submit" expand="full" (click)="onUpdate()">Update</ion-button>
-    <ion-button type="button" expand="full" (click)="onDelete('name')">Delete Name</ion-button>
-    <ion-button type="button" expand="full" (click)="onDelete('age')">Delete Age</ion-button>
-    <ion-button type="button" expand="full" (click)="onDelete('phoneNumber')">Delete Number</ion-button>
-    <ion-button type="button" expand="full" (click)="onDelete('address')">Delete Address</ion-button>
+    <ion-button type="submit" expand="full" (click)="onSave()">Save Profile</ion-button>
+
+   
   </form>
 
 
