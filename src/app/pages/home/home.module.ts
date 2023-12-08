@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { HomePage } from './home.page';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HomePageRoutingModule } from './home-routing.module';
+import { FeedComponent } from 'src/app/components/feed/feed.component';
 
 
 @NgModule({
@@ -13,8 +14,9 @@ import { HomePageRoutingModule } from './home-routing.module';
     FormsModule,
     IonicModule,
     HomePageRoutingModule,
-    MatDialogModule
+    MatDialogModule,
+    
   ],
-  declarations: [HomePage]
+  declarations: [HomePage, FeedComponent,]
 })
 export class HomePageModule {}

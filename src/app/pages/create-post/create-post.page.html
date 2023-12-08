@@ -2,19 +2,30 @@
   <ion-card-header>
     <ion-card-title>Create a Post</ion-card-title>
   </ion-card-header>
+
   <div>
-    <ion-textarea>Say Something</ion-textarea>
-    
-    <div  id="post-preview">
-      <img id="post-preview-image"/>
+    <!-- Use ngModel to bind the text area content to a variable -->
+    <ion-textarea [(ngModel)]="postContent" placeholder="Say Something"></ion-textarea>
+
+    <!-- Display the selected image -->
+    <div id="post-preview">
+      <img [src]="previewImageUrl" id="post-preview-image" />
     </div>
+
+    <!-- Use (change) event binding to detect when a file is selected -->
     <ion-button>
       <label for="photo-upload">
-      <input
-      id="photo-upload" type="file" accept="image/*">
-      <ion-icon name="images-outline"></ion-icon>
-    </label>
+        <input
+          id="photo-upload"
+          type="file"
+          accept="image/*"
+          (change)="onPhotoSelected($event)"
+        />
+        <ion-icon name="images-outline"></ion-icon>
+      </label>
     </ion-button>
-    <ion-button>Post</ion-button>
+
+    <!-- Use (click) event binding to trigger the createPost method -->
+    <ion-button (click)="createPost()">Post</ion-button>
   </div>
-  </ion-card>
+</ion-card>
