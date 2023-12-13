@@ -41,12 +41,18 @@ export class CreatePostPage implements OnInit {
   createPost() {
     const user = this.auth.getCurrentUser();
   
-    if (user && this.postContent && this.selectedImageFile) {
+    if (user && this.postContent) {
       const userId = user.uid;
   
       this.userProfileService.createPost(userId, this.postContent, this.selectedImageFile).subscribe(
-        () => {
-          console.log('Post Create Successfully!');
+        (result) => {
+          if (typeof result === 'string') {
+            const postId = result;
+            console.log('Post Created Successfully!', postId);
+            // Now you can use the postId as needed
+          } else {
+            console.log('Post Created Successfully!');
+          }
         },
         (error) => {
           console.log(error);
@@ -59,6 +65,11 @@ export class CreatePostPage implements OnInit {
     this.postContent = '';
     this.previewImageUrl = undefined;
   }
+  
+
+  
+  
+  
   
 
 }

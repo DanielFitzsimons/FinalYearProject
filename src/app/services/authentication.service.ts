@@ -9,9 +9,12 @@ import {
 } from '@angular/fire/auth';
 import { doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { LoadingController } from '@ionic/angular';
+
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class AuthenticationService {
 
   private isAuthenticated: boolean = false;
@@ -21,7 +24,7 @@ export class AuthenticationService {
 
 
 
-  async register({ email, password, name,  }: { email: string, password: string, name: string, }) {
+  async register({ email, password,  }: { email: string, password: string }) {
     try{
       const credentials = await createUserWithEmailAndPassword(
         this.auth,
@@ -29,7 +32,7 @@ export class AuthenticationService {
         password
       );
       const ref = doc(this.firestore, `users/${credentials.user.uid}`);
-      const userData = { email, name }; // Add additional user data
+      const userData = { email }; 
       setDoc(ref, {email});
       this.isAuthenticated = true;
       return credentials;
@@ -73,8 +76,7 @@ export class AuthenticationService {
     // Ensure that user is authenticated before returning the user object
     return this.auth.currentUser;
   }
-  
-  // Existing code...
+ 
 
   onUpdateProfileField(uid: string, field: string, value: any): Promise<void> {
     const userProfileRef = doc(this.firestore, `users/${uid}`);

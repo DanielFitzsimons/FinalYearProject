@@ -1,0 +1,19 @@
+/* create-post.page.scss */
+
+ion-card {
+    width: 80%; /* Adjust the width to your preference */
+    max-width: 400px; /* Set a maximum width if needed */
+    margin: 10px auto; /* Center the card horizontally and add some margin */
+  }
+  
+  ion-card-content {
+    /* Add styling to the card content */
+  }
+  
+  img {
+    max-width: 100%; /* Make sure images don't exceed the width of their container */
+    height: auto; /* Maintain the aspect ratio of the images */
+    display: block; /* Remove any default spacing around images */
+    margin: 0 auto; /* Center the images horizontally */
+  }
+  

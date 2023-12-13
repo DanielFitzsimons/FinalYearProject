@@ -1,19 +1,24 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, getDoc, updateDoc, setDoc, collectionData } from '@angular/fire/firestore';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { Firestore, collection, doc, getDoc, updateDoc, setDoc, collectionData, deleteDoc, addDoc } from '@angular/fire/firestore';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthenticationService } from './authentication.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserProfileService {
 
+  imageData: any;
+ 
+
   constructor(
     private firestore: Firestore,
     private auth: AuthenticationService,
     private fb: FormBuilder,
+    private storage: Storage,
   ) { }
 
   // Retrieve the user's profile data
@@ -43,7 +48,7 @@ export class UserProfileService {
     }
   }
 
-  // UserProfileService.service.ts
+ 
 
 updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observable<void> {
   if (uid) {
@@ -88,34 +93,130 @@ updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observa
     }
   }
 
-  createPost(userId: string, postContent: string, imageFile: File): Observable<void> {
+ 
+  createPost(userId: string, postContent: string, imageFile?: File): Observable<string | void> {
     const postCollectionRef = collection(this.firestore, 'posts');
-    const formData = new FormData();
   
-    // Append post data
-    formData.append('userId', userId);
-    formData.append('content', postContent);
-  
-    // Check if an image file is provided
     if (imageFile) {
-      formData.append('image', imageFile, imageFile.name);
-    }
+      const storageRef = ref(this.storage, `post-images/${imageFile.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, imageFile);
   
-    return new Observable<void>((observer) => {
-      setDoc(doc(postCollectionRef), formData).then(() => {
-        observer.next();
-      }).catch((error) => {
-        observer.error('Error creating a post: ' + error);
+      return new Observable<string | void>((observer) => {
+        uploadTask.then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((downloadURL) => {
+            const postData: any = {
+              userId,
+              content: postContent,
+              imageUrl: downloadURL,
+              timestamp: new Date(),
+            };
+  
+            addDoc(postCollectionRef, postData).then((docRef) => {
+              const postId = docRef.id;
+              observer.next(postId);
+            }).catch((error) => {
+              observer.error('Error creating a post: ' + error);
+            });
+          }).catch((error) => {
+            observer.error('Error getting download URL: ' + error);
+          });
+        }).catch((error) => {
+          observer.error('Error uploading image: ' + error);
+        });
       });
-    });
+    } else {
+      const postData: any = {
+        userId,
+
+        content: postContent,
+        timestamp: new Date(),
+      };
+  
+      return new Observable<string | void>((observer) => {
+        addDoc(postCollectionRef, postData).then((docRef) => {
+          const postId = docRef.id;
+          observer.next(postId);
+        }).catch((error) => {
+          observer.error('Error creating a post: ' + error);
+        });
+      });
+    }
   }
   
 
-  getPosts(): Observable<any[]> {
-    const postCollectionRef = collection(this.firestore, 'posts');
   
-    return collectionData(postCollectionRef).pipe(
-      map((posts) => posts.map((post) => ({ id: post['id'], ...post })))
-    );
-  }
+  // userProfile.service.ts
+editPost(postId: string, updatedContent: string): Observable<void> {
+  const postRef = doc(this.firestore, `posts/${postId}`);
+  const updatedData = { content: updatedContent };
+
+  return new Observable<void>((observer) => {
+    updateDoc(postRef, updatedData)
+      .then(() => {
+        observer.next();
+      })
+      .catch((error) => {
+        observer.error('Error updating post: ' + error);
+      });
+  });
 }
+
+
+deletePost(postId: string, userId: string): Observable<void> {
+  const postRef = doc(this.firestore, `posts/${postId}`);
+
+  return new Observable<void>((observer) => {
+    getDoc(postRef)
+      .then((docSnap) => {
+        if (docSnap.exists()) {
+          const postData: any = docSnap.data();
+
+          console.log('postData.userId:', postData.userId);
+          console.log('userId:', userId);
+
+
+
+          // Ensure the post belongs to the authenticated user
+          if (postData.userId === userId) {
+            deleteDoc(postRef)
+              .then(() => {
+                observer.next();
+                observer.complete(); // Make sure to complete the observable
+              })
+              .catch((error) => {
+                observer.error('Error deleting post: ' + error);
+              });
+          } else {
+            observer.error('You are not authorized to delete this post.');
+          }
+        } else {
+          observer.error('Post not found');
+        }
+      })
+      .catch((error) => {
+        observer.error('Error fetching post data: ' + error);
+      });
+  });
+}
+
+
+
+  
+ 
+
+getPosts(): Observable<any[]> {
+  const postCollectionRef = collection(this.firestore, 'posts');
+
+  return collectionData(postCollectionRef, { idField: 'postId' }).pipe(
+    map((posts) => posts.map((post) => ({ id: post.postId, ...post })))
+  );
+}
+
+
+
+
+
+}
+
+
+

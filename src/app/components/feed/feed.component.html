@@ -2,6 +2,11 @@
 <ion-card *ngFor="let post of posts">
   <!-- Display post content and other details -->
   <ion-card-content>{{ post.content }}</ion-card-content>
-  <!-- ... other details -->
+  <!-- Display the image if imageUrl is present -->
+  <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Post Image">
+
+  <ion-button (click)="editPost(post)">Edit</ion-button>
+
+  <ion-button (click)="deletePost(post)">Delete</ion-button>
 </ion-card>
 

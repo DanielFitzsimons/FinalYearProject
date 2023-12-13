@@ -13,7 +13,7 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { getStorage, provideStorage } from '@angular/fire/storage';
-import { FirebaseTSApp } from 'firebasets/firebasetsApp/firebaseTSApp';
+
 import { FirestoreModule } from '@angular/fire/firestore';
 import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
 
@@ -32,6 +32,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 })
 export class AppModule {
   constructor(){
-    FirebaseTSApp.init(environment.firebaseConfig);
+    
   }
 }
