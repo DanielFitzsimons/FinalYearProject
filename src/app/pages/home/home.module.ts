@@ -6,6 +6,7 @@ import { HomePage } from './home.page';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HomePageRoutingModule } from './home-routing.module';
 import { FeedComponent } from 'src/app/components/feed/feed.component';
+import { TabsComponent } from 'src/app/tabs/tabs.component';
 
 
 @NgModule({
@@ -17,6 +18,6 @@ import { FeedComponent } from 'src/app/components/feed/feed.component';
     MatDialogModule,
     
   ],
-  declarations: [HomePage, FeedComponent,]
+  declarations: [HomePage, FeedComponent, TabsComponent]
 })
 export class HomePageModule {}

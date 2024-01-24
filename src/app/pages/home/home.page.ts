@@ -26,7 +26,7 @@ export class HomePage {
 
     this.router.navigateByUrl('/', {replaceUrl: true});
   }
-
+  //opens pop up box for posts
   onCreatePostClick(){
     this.dialog.open(CreatePostPage);
   }

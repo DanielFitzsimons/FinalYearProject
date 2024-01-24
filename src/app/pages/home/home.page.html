@@ -5,32 +5,34 @@
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">
-    <!-- Add an ion-list for stacked buttons -->
     <ion-list>
       <ion-button id="profile" routerLink="/profile">
         View Profile
       </ion-button>
-      <ion-button id="logout" (click)="logout()">
+      <ion-button id="logout">
         Logout
       </ion-button>
     </ion-list>
   </ion-content>
 </ion-menu>
 
-<div class="ion-page" id="main-content">
-  <ion-header>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-menu-button></ion-menu-button>
-      </ion-buttons>
-      <ion-title>Home</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content class="ion-padding">
-    <ion-button (click)="onCreatePostClick()" id="post-button">
-      <ion-icon name="chevron-forward-circle-outline"></ion-icon>
-    </ion-button>
-    <app-feed></app-feed>
-  </ion-content>
-</div>
+<ion-router-outlet id="main-content"></ion-router-outlet>
 
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Home</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <app-feed></app-feed>
+  <ion-button (click)="onCreatePostClick()" id="post-button">
+    <ion-icon name="chevron-forward-circle-outline"></ion-icon>
+  </ion-button>
+  <!-- Other content -->
+</ion-content>
+
+<app-tabs></app-tabs>
