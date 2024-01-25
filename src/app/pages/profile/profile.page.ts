@@ -1,10 +1,12 @@
-// profile.page.ts
+// Import necessary Angular and Firebase modules, services, and dependencies
 import { Component, OnInit } from '@angular/core';
-import { Firestore, doc, getDoc, collectionData, updateDoc, collection, } from '@angular/fire/firestore';
+import { Firestore, doc, getDoc, collectionData, updateDoc, collection } from '@angular/fire/firestore';
 import { AuthenticationService } from '../../services/authentication.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UserProfileService } from 'src/app/services/user-profile.service';
+import { LoadingController } from '@ionic/angular';
+
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -13,12 +15,15 @@ import { UserProfileService } from 'src/app/services/user-profile.service';
 export class ProfilePage implements OnInit {
   user: any; // The user object
   uid: string = ''; // The UID of the user
+  private loading: any;
 
   // Observable to store user profile data from Firestore collection
   userProfileData$ = collectionData(collection(this.firestore, 'users'));
 
   // Flag to toggle the visibility of profile data in the template
   showProfileData: boolean = false;
+
+  showForm: boolean = false;
 
   // Form group for user profile data with default values and validators
   profileForm = this.fb.group({
@@ -35,18 +40,19 @@ export class ProfilePage implements OnInit {
     private auth: AuthenticationService,
     private fb: FormBuilder,
     private userProfileService: UserProfileService,
+    private loadingController: LoadingController,
   ) { }
 
   // Lifecycle hook called after component initialization
   ngOnInit() {
     // Retrieve the currently authenticated user
     const user = this.auth.getCurrentUser();
-    
+
     // Check if a user is authenticated
     if (user) {
       this.uid = user.uid; // Set UID
       this.user = user; // Set user object
-  
+
       // Check if UID is defined
       if (this.uid) {
         // Use the UserProfileService to get user profile data
@@ -73,52 +79,54 @@ export class ProfilePage implements OnInit {
       console.error('User not authenticated');
     }
 
-    // Initialize the observable with the user profiles collection
-
     // Retrieve data from the Firestore collection named 'users'
     this.userProfileData$ = collectionData(collection(this.firestore, 'users')).pipe(
       // Apply the map operator to transform the emitted array of user profiles
-      map(userProfiles => 
+      map(userProfiles =>
         // Use the filter function to include only profiles with matching email
         userProfiles.filter(profile => profile['email'] === this.user?.email)
       )
     );
-
   }
 
   // Method to update user profile data
-  onSave() {
-    this.userProfileService.updateUserProfile(this.profileForm).subscribe(
-      () => {
+  async onSave(profile: any) {
+    try {
+      //this.presentLoading(); // Show loading indicator
+
+      if (this.uid) {
+        const userProfileRef = doc(this.firestore, `users/${this.uid}`);
+        await updateDoc(userProfileRef, profile);
         console.log('User profile updated successfully!');
         this.showProfileData = true;
-        this.profileForm.reset();
-      },
-      (error) => {
-        console.error(error);
+      } else {
+        console.error('User UID is undefined or null.');
       }
-    );
-  }
-
-  onUpdate(fieldName: string) {
-    const fieldValue = this.profileForm.get(fieldName)?.value;
-  
-    if (this.uid && fieldValue !== undefined) {
-      this.userProfileService.updateUserProfileField(this.uid, fieldName, fieldValue).subscribe(
-        () => {
-          console.log(`Field '${fieldName}' updated successfully in user profile!`);
-          this.showProfileData = true;
-        },
-        (error) => {
-          console.error(`Error updating field '${fieldName}' in user profile: `, error);
-        }
-      );
-    } else {
-      console.error('User UID is undefined or null or field value is undefined.');
+    } catch (error) {
+      console.error('Error updating user profile: ', error);
+    } finally {
+      //this.dismissLoading(); // Dismiss loading indicator regardless of success or error
     }
   }
 
-   // onDelete() {
+  async onUpdate(fieldName: string) {
+    const fieldValue = this.profileForm.get(fieldName)?.value;
+
+    try {
+      if (this.uid && fieldValue !== undefined) {
+        // Perform the update operation
+        await this.userProfileService.updateUserProfileField(this.uid, fieldName, fieldValue).toPromise();
+        console.log(`Field '${fieldName}' updated successfully in user profile!`);
+        this.showProfileData = true;
+      } else {
+        console.error('User UID is undefined or null or field value is undefined.');
+      }
+    } catch (error) {
+      console.error(`Error updating field '${fieldName}' in user profile: `, error);
+    }
+  }
+
+  // onDelete() {
   //   // Ensure that this.uid is defined and not empty
   //   if (this.uid) {
   //     // Construct the document reference with a valid path
@@ -156,38 +164,55 @@ export class ProfilePage implements OnInit {
   // }
 
   // Method to delete a specific field from user profile
-  onDelete(fieldToDelete: string) {
-    // Ensure that UID is defined and not empty
-    if (this.uid) {
-      // Construct the document reference for the user profile
-      const userProfileRef = doc(this.firestore, `users/${this.uid}`);
+  // onDelete(fieldToDelete: string) {
+  //   // Ensure that UID is defined and not empty
+  //   if (this.uid) {
+  //     // Construct the document reference for the user profile
+  //     const userProfileRef = doc(this.firestore, `users/${this.uid}`);
 
-      // Fetch the existing user profile document
-      getDoc(userProfileRef).then((docSnap) => {
-        if (docSnap.exists()) {
-          // If the document exists, update it by removing the specified field
-          const updatedData = { [fieldToDelete]: null };
+  //     // Fetch the existing user profile document
+  //     getDoc(userProfileRef).then((docSnap) => {
+  //       if (docSnap.exists()) {
+  //         // If the document exists, update it by removing the specified field
+  //         const updatedData = { [fieldToDelete]: null };
 
-          // Use the updateDoc method to remove the specified field
-          updateDoc(userProfileRef, updatedData)
-            .then(() => {
-              console.log(`Field '${fieldToDelete}' deleted successfully from user profile!`);
-              this.showProfileData = true; // Set flag to show profile data in the template
-            })
-            .catch((error) => {
-              console.error(`Error deleting field '${fieldToDelete}' from user profile: `, error);
-            });
-        } else {
-          console.error('User profile not found');
-        } 
-      })
-      .catch((error) => {
-        console.error('Error fetching user profile data: ', error);
-      });
-    } else {
-      console.error('User UID is undefined or null.');
-    }
+  //         // Use the updateDoc method to remove the specified field
+  //         updateDoc(userProfileRef, updatedData)
+  //           .then(() => {
+  //             console.log(`Field '${fieldToDelete}' deleted successfully from user profile!`);
+  //             this.showProfileData = true; // Set flag to show profile data in the template
+  //           })
+  //           .catch((error) => {
+  //             console.error(`Error deleting field '${fieldToDelete}' from user profile: `, error);
+  //           });
+  //       } else {
+  //         console.error('User profile not found');
+  //       } 
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching user profile data: ', error);
+  //     });
+  //   } else {
+  //     console.error('User UID is undefined or null.');
+  //   }
+  // }
+
+  toggleForm() {
+    this.showForm = !this.showForm;
   }
 
+  async presentLoading() {
+    this.loading = await this.loadingController.create({
+      message: 'Saving data...',
+      spinner: 'dots', // You can choose a different spinner if you prefer
+    });
+    await this.loading.present();
+  }
 
+  // Method to dismiss loading indicator
+  async dismissLoading() {
+    if (this.loading) {
+      await this.loading.dismiss();
+    }
+  }
 }

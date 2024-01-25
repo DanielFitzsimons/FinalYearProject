@@ -32,7 +32,7 @@ export class FeedComponent implements OnInit {
     );
   }
 
-  // feed.component.ts
+//allows for editing of post text through service
   editPost(post: any) {
     const updatedContent = prompt('Enter updated content:', post.content);
 
@@ -49,7 +49,7 @@ export class FeedComponent implements OnInit {
       );
     }
   }
-  // feed.component.ts
+  
   // deletePost(post: any) {
   //   const confirmDelete = confirm('Are you sure you want to delete this post?');
 
@@ -66,6 +66,8 @@ export class FeedComponent implements OnInit {
   //     );
   //   }
   // }
+
+  //allows for deletin of posts through service
   deletePost(post: any) {
     // Get the current user from your authentication service
     const currentUser: User | null = this.auth.getCurrentUser();

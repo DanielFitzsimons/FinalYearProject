@@ -22,8 +22,11 @@ export class AuthenticationService {
 
   constructor(private auth:Auth, private firestore: Firestore, private loadingController: LoadingController) { }
 
+  ngOnit(){
 
+  }
 
+  // to register a user
   async register({ email, password,  }: { email: string, password: string }) {
     try{
       const credentials = await createUserWithEmailAndPassword(
@@ -42,7 +45,7 @@ export class AuthenticationService {
       return null;
     }
   }
-
+// for already created users to log in
   async login({ email, password }: { email: string, password: string }) {
     try {
       const credentials = await signInWithEmailAndPassword(this.auth, email, password);
@@ -63,32 +66,41 @@ export class AuthenticationService {
     }
   }
 
+  
+
+  // reset authenticated user password
   resetPw(email: string) {
     // Pass in athentication private and email address
     return sendPasswordResetEmail(this.auth, email);
   }
-
+  //check if user is auntehticated for profile
   isAuthenticatedUser(){
     return this.isAuthenticated;
   }
-  
+
+  getAuthenticationStatus(): boolean {
+    return this.isAuthenticated;
+  }
+
+  //gets the current user thats signed in
   getCurrentUser() {
     // Ensure that user is authenticated before returning the user object
+    console.log('Current User:', this.auth.currentUser);
     return this.auth.currentUser;
   }
  
-
+  //to update a field for profile
   onUpdateProfileField(uid: string, field: string, value: any): Promise<void> {
     const userProfileRef = doc(this.firestore, `users/${uid}`);
     return updateDoc(userProfileRef, { [field]: value });
   }
-
+  //delet profile field 
   onDeleteProfileField(uid: string, field: string): Promise<void> {
     const userProfileRef = doc(this.firestore, `users/${uid}`);
     return updateDoc(userProfileRef, { [field]: null });
   }
 
-
+  //handles log out for users
   async logout() {
     try {
       const currentUser = this.getCurrentUser();

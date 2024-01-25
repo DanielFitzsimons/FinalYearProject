@@ -4,11 +4,7 @@
   right: 2em;
 }
 
-#logout {
-  position: absolute;
-  top: 0; /* Example position - adjust as needed */
-  right: 0; /* Example position - adjust as needed */
-}
+
 
 app-tabs {
   position: fixed;
@@ -23,3 +19,10 @@ ion-content {
   overflow-y: auto; /* ensures that content scrolls within the container */
   --offset-bottom: 56px; 
 }
+
+ion-button {
+  display: block;
+  width: 100%; /* Makes the button full width */
+  margin-top: 10px; /* Adds space between the buttons */
+}
+

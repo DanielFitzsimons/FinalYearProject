@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, getDoc, updateDoc, setDoc, collectionData, deleteDoc, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, doc, getDoc, updateDoc, collectionData, deleteDoc, addDoc } from '@angular/fire/firestore';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthenticationService } from './authentication.service';
 import { Observable } from 'rxjs';
@@ -21,6 +21,7 @@ export class UserProfileService {
     private storage: Storage,
   ) { }
 
+  
   // Retrieve the user's profile data
   getUserProfile(): Observable<any> {
     const user = this.auth.getCurrentUser();
@@ -93,7 +94,7 @@ updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observa
     }
   }
 
- 
+ // Create a post with optional image
   createPost(userId: string, postContent: string, imageFile?: File): Observable<string | void> {
     const postCollectionRef = collection(this.firestore, 'posts');
   
@@ -145,7 +146,7 @@ updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observa
   
 
   
-  // userProfile.service.ts
+  
 editPost(postId: string, updatedContent: string): Observable<void> {
   const postRef = doc(this.firestore, `posts/${postId}`);
   const updatedData = { content: updatedContent };
@@ -161,7 +162,7 @@ editPost(postId: string, updatedContent: string): Observable<void> {
   });
 }
 
-
+// Delete a post
 deletePost(postId: string, userId: string): Observable<void> {
   const postRef = doc(this.firestore, `posts/${postId}`);
 
@@ -173,8 +174,6 @@ deletePost(postId: string, userId: string): Observable<void> {
 
           console.log('postData.userId:', postData.userId);
           console.log('userId:', userId);
-
-
 
           // Ensure the post belongs to the authenticated user
           if (postData.userId === userId) {
@@ -198,12 +197,8 @@ deletePost(postId: string, userId: string): Observable<void> {
       });
   });
 }
-
-
-
-  
  
-
+// Get all posts
 getPosts(): Observable<any[]> {
   const postCollectionRef = collection(this.firestore, 'posts');
 

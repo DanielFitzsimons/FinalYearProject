@@ -31,6 +31,10 @@ const routes: Routes = [
     path: 'create-post',
     loadChildren: () => import('./pages/create-post/create-post.module').then( m => m.CreatePostPageModule)
   },
+  {
+    path: 'messaging',
+    loadChildren: () => import('./pages/messaging/messaging.module').then( m => m.MessagingPageModule)
+  },
   
 ];
 

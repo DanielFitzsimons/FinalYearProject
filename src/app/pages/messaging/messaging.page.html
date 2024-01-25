@@ -1,0 +1,70 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>messaging</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">messaging</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+
+  <ion-list>
+    <ion-item *ngFor="let conversation of conversations" (click)="openConversation(conversation)">
+      <ion-label>
+        <h2>{{ conversation.otherUserName }}</h2>
+        <p>{{ conversation.lastMessage }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item *ngFor="let user of users$ | async" (click)="startConversationWithUser(user)">
+      <ion-label>
+        <h2>{{ user.name }}</h2>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-content [fullscreen]="true">
+    <!-- existing code -->
+  
+    <!-- Updated list to open conversations -->
+    <ion-list>
+      <ion-item *ngFor="let user of users$ | async" (click)="openConversationWithUser(user)">
+        <ion-label>
+          <h2>{{ user.name }}</h2>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  
+    <!-- Conversation view -->
+    <div *ngIf="currentConversationId">
+      <div *ngFor="let message of messages | async">
+        <p>{{ message.sender }}: {{ message.content }}</p>
+      </div>
+      <input type="text" [(ngModel)]="newMessage">
+      <button (click)="send()">Send</button>
+    </div>
+  </ion-content>
+  
+
+  <div *ngFor="let message of messages | async">
+    <p>{{ message.sender }}: {{ message.content }}</p>
+  </div>
+  <!-- Use 'newMessage' if that's the name of the property in your class -->
+<input type="text" [(ngModel)]="newMessage">
+<button (click)="send()">Send</button>
+
+
+
+
+
+
+  
+  
+  
+</ion-content>

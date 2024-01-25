@@ -7,20 +7,150 @@
   </ion-toolbar>
 </ion-header>
 
-<ng-container *ngIf="userProfileData$ | async as userProfiles">
-  <ion-button *ngIf="userProfiles.length"
-              expand="full" (click)="showProfileData = !showProfileData">
+
+<ion-content>
+
+  
+  <ng-container *ngIf="(userProfileData$ | async) as userProfiles">
+    <ng-container *ngIf="showProfileData">
+      <ion-card *ngFor="let profile of userProfiles">
+        <ion-card-header>
+          <ion-card-title>Email: {{ user?.email }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label>Name: </ion-label>
+            <ion-input [(ngModel)]="profile['name']" readonly></ion-input>
+              
+          </ion-item>
+  
+          <!-- Age Field -->
+          <ion-item>
+            <ion-label>Age: </ion-label>
+            <ion-input type="number" [(ngModel)]="profile['age']" readonly></ion-input>
+          
+          </ion-item>
+  
+          <!-- Number Field -->
+          <ion-item>
+            <ion-label>Number</ion-label>
+            <ion-input type="number" [(ngModel)]="profile['phoneNumber']" readonly></ion-input>
+          </ion-item>
+  
+          <!-- Address Field -->
+          <ion-item>
+            <ion-label>Address</ion-label>
+            <ion-input [(ngModel)]="profile['address']" readonly></ion-input>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+  </ng-container>
+  
+  
+
+  <!-- profile.page.html -->
+
+<ion-content>
+
+  <ng-container *ngIf="userProfileData$ | async as userProfiles">
+    <!-- Button to toggle the visibility of the form -->
+    <ion-button expand="full" (click)="toggleForm()">
+      {{ showForm ? 'Hide Form' : 'Show Form' }}
+    </ion-button>
+  
+    <!-- Form is shown only if showForm is true -->
+    <ion-card *ngIf="showForm">
+      <form [formGroup]="profileForm">
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label position="floating">Email</ion-label>
+              <ion-input formControlName="email" [value]="user?.email" readonly></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label>Name</ion-label>
+              <ion-input formControlName="name"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="auto">
+            <ion-button icon-only (click)="onUpdate('name')">
+              <ion-icon name="create"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label>Age</ion-label>
+              <ion-input formControlName="age"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="auto">
+            <ion-button icon-only (click)="onUpdate('age')">
+              <ion-icon name="create"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label>Phone Number</ion-label>
+              <ion-input formControlName="phoneNumber"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="auto">
+            <ion-button icon-only (click)="onUpdate('phoneNumber')">
+              <ion-icon name="create"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row>
+          <ion-col>
+            <ion-item>
+              <ion-label>Address</ion-label>
+              <ion-input formControlName="address"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="auto">
+            <ion-button icon-only (click)="onUpdate('address')">
+              <ion-icon name="create"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </form>
+    </ion-card>
+  </ng-container>
+  
+
+    <!-- ... (existing code) -->
+
+</ion-content>
+
+ 
+</ion-content>
+
+<!-- <ng-container *ngIf="userProfileData$ | async as userProfiles">
+  <ion-button *ngIf="userProfiles.length" expand="full" (click)="showProfileData = !showProfileData">
     {{ showProfileData ? 'Hide Profile Data' : 'Show Profile Data' }}
   </ion-button>
 
   <ng-container *ngIf="showProfileData">
-    <!-- Display user profile data on a card -->
+   
     <ion-card *ngFor="let profile of userProfiles">
       <ion-card-header>
         <ion-card-title>Email: {{ user?.email }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <!-- Stack the information vertically using <div> -->
+      
         <div>
           <ion-label>Name: {{ profile['name'] }}</ion-label>
         </div>
@@ -37,6 +167,7 @@
     </ion-card>
   </ng-container>
 </ng-container>
+
 
 <ion-content>
   <form [formGroup]="profileForm">
@@ -78,8 +209,8 @@
     <ion-button type="submit" expand="full" (click)="onSave()">Save Profile</ion-button>
 
    
-  </form>
+  </form> -->
 
 
   
-</ion-content>
+

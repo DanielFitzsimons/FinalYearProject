@@ -22,7 +22,7 @@ export class CreatePostPage implements OnInit {
 
   ngOnInit() {
   }
-
+  //allows for choosing a photo from system
   onPhotoSelected(event: Event) {
     const fileInput = event?.target as HTMLInputElement;
   
@@ -37,7 +37,7 @@ export class CreatePostPage implements OnInit {
     }
   }
   
-
+//handles creating of posts that links with service
   createPost() {
     const user = this.auth.getCurrentUser();
   

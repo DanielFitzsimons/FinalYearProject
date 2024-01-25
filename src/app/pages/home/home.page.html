@@ -6,15 +6,17 @@
   </ion-header>
   <ion-content class="ion-padding">
     <ion-list>
-      <ion-button id="profile" routerLink="/profile">
+      <ion-button id="profile" routerLink="/profile" expand="block">
         View Profile
       </ion-button>
-      <ion-button id="logout">
+      <ion-button id="logout" expand="block" (click)="logout()">
         Logout
       </ion-button>
+      <ion-button routerLink="/messaging" expand="block">Messages</ion-button>
     </ion-list>
   </ion-content>
 </ion-menu>
+
 
 <ion-router-outlet id="main-content"></ion-router-outlet>
 
@@ -32,7 +34,7 @@
   <ion-button (click)="onCreatePostClick()" id="post-button">
     <ion-icon name="chevron-forward-circle-outline"></ion-icon>
   </ion-button>
-  <!-- Other content -->
+  
 </ion-content>
 
 <app-tabs></app-tabs>
