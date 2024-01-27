@@ -1,0 +1,10 @@
+<div *ngIf="messages">
+  <!-- Display messages -->
+  <div *ngFor="let message of messages">
+    <p>{{ message.sender }}: {{ message.content }}</p>
+  </div>
+</div>
+
+<!-- Input field for sending messages -->
+<input type="text" [(ngModel)]="newMessage">
+<button (click)="send()">Send</button>

@@ -10,54 +10,71 @@
       <ion-title size="large">messaging</ion-title>
     </ion-toolbar>
   </ion-header>
+  <ion-button routerLink="/home">Home</ion-button>
 
-
-  <ion-list>
-    <ion-item *ngFor="let conversation of conversations" (click)="openConversation(conversation)">
-      <ion-label>
-        <h2>{{ conversation.otherUserName }}</h2>
-        <p>{{ conversation.lastMessage }}</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
-
-  <ion-list>
-    <ion-item *ngFor="let user of users$ | async" (click)="startConversationWithUser(user)">
-      <ion-label>
-        <h2>{{ user.name }}</h2>
-      </ion-label>
-    </ion-item>
-  </ion-list>
-
-  <ion-content [fullscreen]="true">
-    <!-- existing code -->
   
-    <!-- Updated list to open conversations -->
+
+  <!-- Updated list to open conversations -->
+<!-- Updated list to open conversations -->
+<ion-item>
+  <ion-label>Select a user:</ion-label>
+  <ion-select interface="action-sheet" [(ngModel)]="selectedUser">
+    <ion-select-option *ngFor="let user of users$ | async" [value]="user">{{ user.name }}</ion-select-option>
+  </ion-select>
+</ion-item>
+<ion-button (click)="startConversation()">Start Conversation</ion-button>
+
+
+  <!-- Conversation view -->
+  <div *ngIf="currentConversationId">
+    <div *ngFor="let message of messages | async">
+      <p [ngClass]="{'current-user': message.sender === currentUserId, 'other-user': message.sender !== currentUserId}">
+        {{ message.content }}
+      </p>
+    </div>
+    <input type="text" [(ngModel)]="newMessage">
+    <button (click)="sendMessage(newMessage)">Send</button>
+  </div>
+
+
+<!-- In MessagingPage template -->
+<app-messaging-interface
+  *ngIf="currentConversationId"
+  [messages]="messages | async" 
+  [currentUserId]="currentUserId"
+  (messageSend)="sendMessage($event)"> <!-- Bind to sendMessage method -->
+</app-messaging-interface>
+
+
+
+    
+  
+    <!-- Updated list to open conversations 
     <ion-list>
       <ion-item *ngFor="let user of users$ | async" (click)="openConversationWithUser(user)">
         <ion-label>
           <h2>{{ user.name }}</h2>
         </ion-label>
       </ion-item>
-    </ion-list>
+    </ion-list> -->
   
-    <!-- Conversation view -->
-    <div *ngIf="currentConversationId">
+    <!-- Conversation view 
+    <div *ngIf="currentConversationId">a
       <div *ngFor="let message of messages | async">
         <p>{{ message.sender }}: {{ message.content }}</p>
       </div>
       <input type="text" [(ngModel)]="newMessage">
       <button (click)="send()">Send</button>
     </div>
-  </ion-content>
+  </ion-content> 
   
 
   <div *ngFor="let message of messages | async">
     <p>{{ message.sender }}: {{ message.content }}</p>
   </div>
-  <!-- Use 'newMessage' if that's the name of the property in your class -->
+   Use 'newMessage' if that's the name of the property in your class 
 <input type="text" [(ngModel)]="newMessage">
-<button (click)="send()">Send</button>
+<button (click)="send()">Send</button>-->
 
 
 

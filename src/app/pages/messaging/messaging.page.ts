@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Message, MessageService } from 'src/app/services/message.service';
+import { MessageService } from 'src/app/services/message.service';
 import { Observable, map } from 'rxjs';
 import { Timestamp } from '@angular/fire/firestore';
 import { Firestore, collection } from '@angular/fire/firestore';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { UserProfileService } from 'src/app/services/user-profile.service';
+import { Conversation, Message, User } from 'src/app/models/model/model';
 
 @Component({
   selector: 'app-messaging',
@@ -12,125 +13,152 @@ import { UserProfileService } from 'src/app/services/user-profile.service';
   styleUrls: ['./messaging.page.scss'],
 })
 export class MessagingPage implements OnInit {
-  conversations!: Conversation[];
-  newMessage?: string;
-  otherUserName?: string;
-  messages!: Observable<Message[]>;
+  conversations: Conversation[] = []; // Array to store conversations
+  newMessage: string = ''; // Initialize as an empty string to store a new message
+  otherUserName?: string; // Store the name of the other user in a conversation
+  messages?: Observable<Message[]>; // An Observable to store messages in a conversation
 
-  currentUserId?: string;
-  currentConversationId?: string;
+  currentUserId?: string; // Store the current user's ID
+  currentConversationId?: string | null; // Store the ID of the current conversation
 
-  users$!: Observable<User[]>;
+  users$!: Observable<User[]>; // An Observable to store a list of users
+
+  selectedUser?: User; // Store the selected user for starting a new conversation
 
   constructor(
-    private messageService: MessageService,
-    private firestore: Firestore,
-    private auth: AuthenticationService,
-    private userProfileService: UserProfileService
+    private messageService: MessageService, // Inject the MessageService for handling messages
+    private firestore: Firestore, // Inject Firestore for database operations
+    private auth: AuthenticationService, // Inject AuthenticationService for user authentication
+    private userProfileService: UserProfileService // Inject UserProfileService for user profiles
   ) {}
 
   ngOnInit() {
+    this.conversations = []; // Initialize conversations array
     // Ensure the user is authenticated before accessing the user profile
-    if (this.auth.isAuthenticatedUser()) {
-      this.userProfileService.getUserProfile().subscribe(
-        (userProfileData) => {
-          // Handle the user profile data if needed
-          this.currentUserId = userProfileData?.uid;
-        },
-        (error) => {
-          console.error('Error getting user profile:', error);
-        }
-      );
-    } else {
-      console.error('User not authenticated');
-      // Handle the case where the user is not authenticated
+
+    // Subscribe to the auth state observable
+    this.auth.currentUser$.subscribe( // Listen for changes in the current user's authentication state
+    user => {
+      if (user) {
+        // User is authenticated
+        this.currentUserId = user.uid; // Store the current user's ID
+        this.loadConversations(); // Load the user's conversations
+      } else {
+        // User is not authenticated
+        console.error('User not authenticated');
+        // Redirect to login or disable messaging functionality
+      }
+    },
+    error => {
+      console.error('Error in authentication:', error);
     }
+  );
+
+    // Get the list of all users for starting new conversations
+    this.users$ = this.messageService.getUsers(); // Initialize the users Observable
   }
 
-  openConversation(conversation: Conversation) {
-    this.otherUserName = conversation.otherUserName;
-    this.messages = this.messageService.getMessages(conversation.id);
+  async loadConversations() {
+    if (!this.currentUserId) {
+      console.error('Current user ID is not set');
+      return;
+    }
+
+    // Load conversations for the current user
+    this.messageService.getConversationsForUser(this.currentUserId)
+      .subscribe((conversations) => {
+        // Use safe navigation operator and provide a default value (empty array)
+        this.conversations = conversations || []; // Update the conversations array
+      });
   }
 
-  async send() {
-    if (this.newMessage && this.currentConversationId) {
+  async sendMessage(newMessageContent: string) {
+    if (!newMessageContent.trim()) {
+      // If the message is only whitespace, do not send it
+      return;
+    }
+
+    if (this.currentConversationId) {
+      // If there's an ongoing conversation, send the message
       const message: Message = {
         conversationId: this.currentConversationId,
-        sender: this.currentUserId!, // 'sender' instead of 'senderId'
-        content: this.newMessage,
+        sender: this.currentUserId!,
+        content: newMessageContent,
         timestamp: Timestamp.fromDate(new Date()),
       };
-      await this.messageService.sendMessage(this.currentConversationId, message);
-      this.newMessage = ''; // Clear the input
+
+      try {
+        await this.messageService.sendMessage(this.currentConversationId, message); // Send the message
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    } else if (!this.currentConversationId && this.selectedUser) {
+      // If there's no current conversation and a user is selected, start a new one
+      try {
+        const newConversationId = await this.startConversationWithUser(this.selectedUser);
+        if (newConversationId) {
+          this.currentConversationId = newConversationId;
+          this.sendMessage(newMessageContent); // Send the message after creating the conversation
+        }
+      } catch (error) {
+        console.error('Error starting a new conversation:', error);
+      }
     }
   }
 
   async openConversationWithUser(user: User) {
-    let conversation = this.conversations.find((con) =>
-      con.participantIds.includes(user.id)
-    );
-    if (!conversation) {
-      // Start a new conversation if none exists
-      conversation = await this.startConversationWithUser(user);
-      // Check if a conversation was successfully created
-      if (!conversation) {
-        // Handle the case where the conversation could not be created
-        return;
-      }
-    }
+    this.selectedUser = user; // Store the selected user's data
+    this.otherUserName = user.name; // Store the selected user's name for display
 
-    // Now we're sure conversation is defined, proceed to open it
-    this.currentConversationId = conversation.id;
-    this.messages = this.messageService.getMessages(this.currentConversationId);
+    const conversation = this.conversations.find(con => con.participantIds.includes(user.id));
+    if (conversation) {
+      // The conversation exists, proceed to open it
+      this.currentConversationId = conversation.id;
+      this.messages = this.messageService.getMessages(this.currentConversationId); // Load messages in the conversation
+    } else {
+      // The conversation doesn't exist, start a new one
+      await this.startConversationWithUser(user);
+    }
   }
 
-  // Inside MessagingPage class
-  async startConversationWithUser(otherUser: User): Promise<Conversation> {
+  async startConversationWithUser(user: User): Promise<string | undefined> {
     // Ensure that currentUserId is defined
+    console.log('openConversationWithUser called with user:', user);
     if (!this.currentUserId) {
       throw new Error('Current user ID is not set');
     }
 
-    const participants = [
-      { userId: this.currentUserId, userName: 'Your Name' }, // Use actual data
-      { userId: otherUser.id, userName: otherUser.name },
-    ];
+    try {
+      // Create a new conversation with the selected user
+      const newConversationId = await this.messageService.createConversation([
+        { userId: this.currentUserId, userName: 'Your Name' },
+        { userId: user.id, userName: user.name },
+      ]);
 
-    // Now we're sure this.currentUserId is not undefined,
-    // we can safely proceed with creating the conversation
-    const newConversationId = await this.messageService.createConversation(
-      participants
-    );
+      if (newConversationId) {
+        // Add the new conversation to the local state
+        const newConversation: Conversation = {
+          id: newConversationId,
+          participantIds: [this.currentUserId, user.id],
+          lastMessage: '',
+          lastMessageTimestamp: new Date(),
+          otherUserName: user.name,
+        };
+        this.conversations.push(newConversation); // Add the new conversation to the array
+      }
 
-    // Assuming newConversationId is the ID of the new conversation
-    // Create a new conversation object to return
-    const newConversation: Conversation = {
-      id: newConversationId,
-      participantIds: participants.map((p) => p.userId as string), // Type assertion since we checked above
-      lastMessage: '',
-      lastMessageTimestamp: new Date(), // Use the current date as a placeholder
-      otherUserName: otherUser.name,
-    };
-
-    // Add the new conversation to the local state
-    this.conversations.push(newConversation);
-
-    // Return the new conversation object
-    return newConversation;
+      return newConversationId;
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      // Handle the error as needed
+      return undefined;
+    }
   }
-}
 
-export interface Conversation {
-  id: string; // Unique identifier for the conversation
-  participantIds: string[]; // Array of user IDs of the participants
-  lastMessage: string; // The last message sent in this conversation
-  lastMessageTimestamp: Date; // Timestamp of the last message
-  otherUserName?: string; // Name of the other user in the conversation (for one-on-one chats)
-  // Add other relevant properties as needed
-}
-
-export interface User {
-  id: string;
-  name: string;
-  // ... other user properties ...
+  startConversation() {
+    if (this.selectedUser) {
+      // Start a conversation with the selected user
+      this.openConversationWithUser(this.selectedUser);
+    }
+  }
 }

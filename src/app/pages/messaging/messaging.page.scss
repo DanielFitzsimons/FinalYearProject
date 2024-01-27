@@ -1,0 +1,12 @@
+.current-user {
+    text-align: right;
+    background-color: #007bff; /* Blue background for current user's messages */
+    color: #fff; /* White text color for current user's messages */
+  }
+  
+  .other-user {
+    text-align: left;
+    background-color: #f0f0f0; /* Gray background for other user's messages */
+    color: #333; /* Dark text color for other user's messages */
+  }
+  

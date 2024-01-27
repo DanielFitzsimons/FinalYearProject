@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MessagingInterfaceComponent } from 'src/app/components/messaging-interface/messaging-interface.component';
 
 import { IonicModule } from '@ionic/angular';
 
@@ -15,6 +16,6 @@ import { MessagingPage } from './messaging.page';
     IonicModule,
     MessagingPageRoutingModule
   ],
-  declarations: [MessagingPage]
+  declarations: [MessagingPage, MessagingInterfaceComponent]
 })
 export class MessagingPageModule {}
