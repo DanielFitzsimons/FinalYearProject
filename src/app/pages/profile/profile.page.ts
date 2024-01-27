@@ -6,7 +6,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { LoadingController } from '@ionic/angular';
-
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -16,6 +16,7 @@ export class ProfilePage implements OnInit {
   user: any; // The user object
   uid: string = ''; // The UID of the user
   private loading: any;
+  private authStateSubscription!: Subscription; 
 
   // Observable to store user profile data from Firestore collection
   userProfileData$ = collectionData(collection(this.firestore, 'users'));
@@ -45,39 +46,25 @@ export class ProfilePage implements OnInit {
 
   // Lifecycle hook called after component initialization
   ngOnInit() {
-    // Retrieve the currently authenticated user
-    const user = this.auth.getCurrentUser();
+    // Subscribe to the auth state observable
+    this.authStateSubscription = this.auth.currentUser$.subscribe(
+      user => {
+        if (user) {
+          // User is authenticated
+          this.uid = user.uid;
+          this.user = user;
 
-    // Check if a user is authenticated
-    if (user) {
-      this.uid = user.uid; // Set UID
-      this.user = user; // Set user object
-
-      // Check if UID is defined
-      if (this.uid) {
-        // Use the UserProfileService to get user profile data
-        this.userProfileService.getUserProfile().subscribe(
-          (userProfileData) => {
-            // Populate the form with the retrieved user profile data
-            this.profileForm.patchValue({
-              email: this.user?.email,
-              ['name']: userProfileData?.name || '',
-              ['age']: userProfileData?.age || '',
-              ['phoneNumber']: userProfileData?.phoneNumber || '',
-              ['address']: userProfileData?.address || '',
-            });
-            this.showProfileData = true;
-          },
-          (error) => {
-            console.error(error);
-          }
-        );
-      } else {
-        console.error('User UID is undefined or null.');
+          // Now that you have the user, you can load the profile
+          this.loadUserProfile(this.uid);
+        } else {
+          // User is not authenticated, handle accordingly
+          console.error('User not authenticated');
+        }
+      },
+      error => {
+        console.error('Error in auth subscription:', error);
       }
-    } else {
-      console.error('User not authenticated');
-    }
+    );
 
     // Retrieve data from the Firestore collection named 'users'
     this.userProfileData$ = collectionData(collection(this.firestore, 'users')).pipe(
@@ -88,6 +75,35 @@ export class ProfilePage implements OnInit {
       )
     );
   }
+
+  // Function to load user profile data
+loadUserProfile(uid: string) {
+  this.userProfileService.getUserProfile(uid).subscribe(
+    (userProfileData) => {
+      // Check if userProfileData exists and has data
+      if (userProfileData) {
+        // Populate the form with the retrieved user profile data
+        this.profileForm.patchValue({
+          email: userProfileData.email, // Assuming 'email' is a field in the userProfileData
+          name: userProfileData.name, // Assuming 'name' is a field in the userProfileData
+          age: userProfileData.age, // Assuming 'age' is a field in the userProfileData
+          phoneNumber: userProfileData.phoneNumber, // Assuming 'phoneNumber' is a field
+          address: userProfileData.address, // Assuming 'address' is a field
+        });
+        // Show the profile data in the template
+        this.showProfileData = true;
+      } else {
+        // Handle the case where no user profile data was found
+        console.error('No profile data found for this user.');
+      }
+    },
+    error => {
+      // Handle any errors that occur during subscription to userProfileData
+      console.error('Error fetching profile:', error);
+    }
+  );
+}
+
 
   // Method to update user profile data
   async onSave(profile: any) {
