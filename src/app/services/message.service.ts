@@ -1,14 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Firestore, addDoc, collection, collectionData, doc, setDoc, query, orderBy, Timestamp } from '@angular/fire/firestore';
+import { Firestore, addDoc, collection, collectionData, doc, query, orderBy, Timestamp, where } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-
-export interface Message {
-  id?: string;
-  conversationId: string;
-  sender: string;
-  content: string;
-  timestamp: Timestamp;
-}
+import { Conversation, Message, User } from '../models/model/model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,31 +18,32 @@ export class MessageService {
     const messagesRef = collection(this.firestore, 'conversations', conversationId, 'messages');
     await addDoc(messagesRef, {
       ...message,
-      timestamp: Timestamp.fromDate(new Date())
+      timestamp: message.timestamp || Timestamp.fromDate(new Date()), // Use provided timestamp or current time
     });
   }
 
   getMessages(conversationId: string): Observable<Message[]> {
     const messagesRef = collection(this.firestore, 'conversations', conversationId, 'messages');
-    const q = query(messagesRef, orderBy('timestamp'));
+    const q = query(messagesRef, orderBy('timestamp', 'asc')); // Ensure messages are ordered correctly
     return collectionData(q, { idField: 'id' }) as Observable<Message[]>;
   }
 
-    // New method to create a new conversation
-    async createConversation(participants: {userId: string, userName: string}[]): Promise<string> {
-      const conversationsRef = collection(this.firestore, 'conversations');
-      const newConversationData = {
-        participantIds: participants.map(u => u.userId),
-        participantsInfo: participants, // You may store additional info like user names
-        // ... other initial conversation properties
-      };
-      const conversationDocRef = await addDoc(conversationsRef, newConversationData);
-      return conversationDocRef.id; // Return the new conversation ID
-    }
-}
+  async createConversation(participants: { userId: string, userName: string }[]): Promise<string> {
+    const conversationsRef = collection(this.firestore, 'conversations');
+    const newConversationData = {
+      participantIds: participants.map(u => u.userId),
+      participantsInfo: participants, // Additional info like user names
+      lastMessage: '',
+      lastMessageTimestamp: Timestamp.fromDate(new Date()), // Placeholder for the last message timestamp
+      // ... other initial conversation properties
+    };
+    const conversationDocRef = await addDoc(conversationsRef, newConversationData);
+    return conversationDocRef.id; // Return the new conversation ID
+  }
 
-export interface User {
-  id: string;
-  name: string;
- 
+  getConversationsForUser(userId: string): Observable<Conversation[]> {
+    const conversationsRef = collection(this.firestore, 'conversations');
+    const q = query(conversationsRef, where('participantIds', 'array-contains', userId));
+    return collectionData(q, { idField: 'id' }) as Observable<Conversation[]>;
+  }
 }

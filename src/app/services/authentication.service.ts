@@ -5,11 +5,14 @@ import {
   sendPasswordResetEmail, // Used to send a password reset email.
   signInWithEmailAndPassword, // Used to sign in a user with email and password.
   signOut,
-  user, // Used to sign out a user.
+  user,
+  authState // Used to sign out a user.
 } from '@angular/fire/auth';
 import { doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { LoadingController } from '@ionic/angular';
+import { Observable } from 'rxjs';
 
+import { User } from '@angular/fire/auth';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,7 +21,8 @@ import { LoadingController } from '@ionic/angular';
 export class AuthenticationService {
 
   private isAuthenticated: boolean = false;
- 
+  
+  currentUser$ = authState(this.auth);
 
   constructor(private auth:Auth, private firestore: Firestore, private loadingController: LoadingController) { }
 
@@ -45,6 +49,8 @@ export class AuthenticationService {
       return null;
     }
   }
+
+
 // for already created users to log in
   async login({ email, password }: { email: string, password: string }) {
     try {
@@ -74,8 +80,8 @@ export class AuthenticationService {
     return sendPasswordResetEmail(this.auth, email);
   }
   //check if user is auntehticated for profile
-  isAuthenticatedUser(){
-    return this.isAuthenticated;
+  isAuthenticatedUser(): Observable<User | null> {
+    return this.currentUser$;
   }
 
   getAuthenticationStatus(): boolean {

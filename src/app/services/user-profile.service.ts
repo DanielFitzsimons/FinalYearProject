@@ -23,31 +23,23 @@ export class UserProfileService {
 
   
   // Retrieve the user's profile data
-  getUserProfile(): Observable<any> {
-    const user = this.auth.getCurrentUser();
+  // Retrieve the user's profile data for a given UID
+getUserProfile(uid: string): Observable<any> {
+  const userProfileRef = doc(this.firestore, `users/${uid}`);
+  return new Observable<any>((observer) => {
+    getDoc(userProfileRef).then((docSnap) => {
+      if (docSnap.exists()) {
+        const userProfileData: any = docSnap.data();
+        observer.next(userProfileData);
+      } else {
+        observer.error('User profile not found');
+      }
+    }).catch((error) => {
+      observer.error('Error fetching user profile data: ' + error);
+    });
+  });
+}
 
-    if (user) {
-      const uid = user.uid;
-      const userProfileRef = doc(this.firestore, `users/${uid}`);
-
-      return new Observable<any>((observer) => {
-        getDoc(userProfileRef).then((docSnap) => {
-          if (docSnap.exists()) {
-            const userProfileData: any = docSnap.data();
-            observer.next(userProfileData);
-          } else {
-            observer.error('User profile not found');
-          }
-        }).catch((error) => {
-          observer.error('Error fetching user profile data: ' + error);
-        });
-      });
-    } else {
-      return new Observable<any>((observer) => {
-        observer.error('User not authenticated');
-      });
-    }
-  }
 
  
 
