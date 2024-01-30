@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
-import { UserProfileService } from './services/user-profile.service';
+
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -18,6 +18,8 @@ import { FirestoreModule } from '@angular/fire/firestore';
 import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
+
 
 
 

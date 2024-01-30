@@ -35,6 +35,10 @@ const routes: Routes = [
     path: 'messaging',
     loadChildren: () => import('./pages/messaging/messaging.module').then( m => m.MessagingPageModule)
   },
+  {
+    path: 'run-tracker',
+    loadChildren: () => import('./pages/run-tracker/run-tracker.module').then( m => m.RunTrackerPageModule)
+  },
   
 ];
 
