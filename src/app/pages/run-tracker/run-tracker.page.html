@@ -1,0 +1,25 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Run Tracker</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <!-- Map Container -->
+  <div id="map" style="height: 50%;"></div>
+
+  <!-- Distance Selection -->
+  <ion-item>
+    <ion-label>Select Run Distance (km)</ion-label>
+    <ion-select [(ngModel)]="selectedRunDistance">
+      <ion-select-option value="5">5</ion-select-option>
+      <ion-select-option value="10">10</ion-select-option>
+      <!-- Add more options as needed -->
+    </ion-select>
+  </ion-item>
+
+  <!-- Start Tracking Button -->
+  <ion-button (click)="startTracking()">Start Run</ion-button>
+
+</ion-content>
