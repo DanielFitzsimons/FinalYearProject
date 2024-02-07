@@ -55,7 +55,8 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
   async setCurrentPosition() {
     try {
       // Get the current position using the Geolocation API
-      const position = await Geolocation.getCurrentPosition();
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true});
+      console.log("Current Position: " , position);
       const currentPos = new google.maps.LatLng(
         position.coords.latitude,
         position.coords.longitude
@@ -82,6 +83,7 @@ async startTracking() {
   try {
     // Get the current position using the Geolocation API
     const position = await Geolocation.getCurrentPosition();
+    console.log("Start tracking position: ", position);
     const startLocation = new google.maps.LatLng(
       position.coords.latitude,
       position.coords.longitude
@@ -137,7 +139,7 @@ beginRun() {
   this.startTimer();
 }
 
-// Helper method to generate waypoints for a circular path
+
 // Method to generate waypoints to create a rough circular route
 generateCircularPathWaypoints(center: google.maps.LatLng, distanceKm: number): google.maps.DirectionsWaypoint[] {
   const waypoints: google.maps.DirectionsWaypoint[] = [];
@@ -195,7 +197,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
 
   // Helper method to calculate destination based on distance
   calculateDestination(startPos: google.maps.LatLng, distance: number): google.maps.LatLng {
-    // For simplicity, this is a basic example; you may need a more complex algorithm
+
     // Calculate new latitude and longitude based on the desired distance
     const newLat = startPos.lat() + (distance / 111.32); // 1 degree of latitude is approximately 111.32 km
     const newLng =
@@ -215,6 +217,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
   
     this.watchId = Geolocation.watchPosition(options, (position, err) => {
       if (position) {
+        console.log("Live tracking position: ", position);
         this.updateUserMarkerPosition(position);
       } else if (err) {
         console.error('Error watching position:', err);
@@ -222,9 +225,10 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
     });
   }
 
-  // Method to update user marker position
-  // Method to update user marker position
+ 
+// Method to update user marker position
 updateUserMarkerPosition(position: any) {
+  console.log("Updating position");
   const newPos = new google.maps.LatLng(
     position.coords.latitude,
     position.coords.longitude
@@ -243,10 +247,18 @@ updateUserMarkerPosition(position: any) {
 
   // Update user marker
   if (this.userMarker && this.map) {
-    this.userMarker.setPosition(newPos);
-    this.map.panTo(newPos);
+    this.userMarker.setPosition(newPos); // This updates the marker position
+    this.map.panTo(newPos); // This keeps the marker in the center of the map view
+  } else if (this.map) {
+    // If the marker hasn't been created yet, create it at the new position
+    this.userMarker = new google.maps.Marker({
+      position: newPos,
+      map: this.map,
+      title: 'Your Location'
+    });
   }
 }
+
   //method to calculate pace of user 
   calculatePace() {
     if (!this.startTime) {
@@ -300,7 +312,7 @@ updateUserMarkerPosition(position: any) {
       );
     }
   
-    // ... existing startTimer, formatTime, pad, and stopRun methods ...
+   
   
     // Method to format distance for display
     formatDistance(distance: number): string {
