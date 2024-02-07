@@ -27,3 +27,10 @@ export interface User {
     timestamp: Timestamp;
   }
   
+
+  export interface Team{
+    id?: string;
+    groupName: string;
+    groupDescription?: string;
+    members: string[];
+  }
