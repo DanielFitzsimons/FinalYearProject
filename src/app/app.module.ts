@@ -26,6 +26,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 
 
+
+
 @NgModule({
   declarations: [AppComponent,],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, ReactiveFormsModule, MatBottomSheetModule, BrowserAnimationsModule, FirestoreModule,  provideFirebaseApp(() => initializeApp(environment.firebaseConfig)), provideAuth(() => getAuth()), provideFirestore(() => getFirestore()), provideDatabase(() => getDatabase()), provideStorage(() => getStorage())],

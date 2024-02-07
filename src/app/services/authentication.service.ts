@@ -27,7 +27,7 @@ export class AuthenticationService {
   constructor(private auth:Auth, private firestore: Firestore, private loadingController: LoadingController) { }
 
   ngOnit(){
-
+    this.getCurrentUser();
   }
 
   // to register a user

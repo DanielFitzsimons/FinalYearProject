@@ -39,6 +39,10 @@ const routes: Routes = [
     path: 'run-tracker',
     loadChildren: () => import('./pages/run-tracker/run-tracker.module').then( m => m.RunTrackerPageModule)
   },
+  {
+    path: 'groups-page',
+    loadChildren: () => import('./pages/groups-page/groups-page.module').then( m => m.GroupsPagePageModule)
+  },
   
 ];
 
