@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, doc, getDoc, updateDoc, collectionData, deleteDoc, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, doc, getDoc, updateDoc, collectionData, deleteDoc, addDoc, query, where } from '@angular/fire/firestore';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthenticationService } from './authentication.service';
 import { Observable } from 'rxjs';
@@ -12,6 +12,8 @@ import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fir
 export class UserProfileService {
 
   imageData: any;
+
+  groupId?: string;
  
 
   constructor(
@@ -22,9 +24,10 @@ export class UserProfileService {
   ) { }
 
   
-  // Retrieve the user's profile data
+  
   // Retrieve the user's profile data for a given UID
 getUserProfile(uid: string): Observable<any> {
+  console.log(`Fetching user profile for UID: ${uid}`); // Debug log
   const userProfileRef = doc(this.firestore, `users/${uid}`);
   return new Observable<any>((observer) => {
     getDoc(userProfileRef).then((docSnap) => {
@@ -87,54 +90,38 @@ updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observa
   }
 
  // Create a post with optional image
-  createPost(userId: string, postContent: string, imageFile?: File): Observable<string | void> {
-    const postCollectionRef = collection(this.firestore, 'posts');
-  
+ createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {
+  const postCollectionRef = collection(this.firestore, 'posts');
+  let postData: any = {
+    userId,
+    content: postContent,
+    groupId, // Include groupId in the post data
+    timestamp: new Date(),
+  };
+
+  return new Observable<string | void>((observer) => {
     if (imageFile) {
       const storageRef = ref(this.storage, `post-images/${imageFile.name}`);
       const uploadTask = uploadBytesResumable(storageRef, imageFile);
-  
-      return new Observable<string | void>((observer) => {
-        uploadTask.then((snapshot) => {
-          getDownloadURL(snapshot.ref).then((downloadURL) => {
-            const postData: any = {
-              userId,
-              content: postContent,
-              imageUrl: downloadURL,
-              timestamp: new Date(),
-            };
-  
-            addDoc(postCollectionRef, postData).then((docRef) => {
-              const postId = docRef.id;
-              observer.next(postId);
-            }).catch((error) => {
-              observer.error('Error creating a post: ' + error);
-            });
-          }).catch((error) => {
-            observer.error('Error getting download URL: ' + error);
-          });
-        }).catch((error) => {
-          observer.error('Error uploading image: ' + error);
-        });
-      });
-    } else {
-      const postData: any = {
-        userId,
 
-        content: postContent,
-        timestamp: new Date(),
-      };
-  
-      return new Observable<string | void>((observer) => {
-        addDoc(postCollectionRef, postData).then((docRef) => {
-          const postId = docRef.id;
-          observer.next(postId);
-        }).catch((error) => {
-          observer.error('Error creating a post: ' + error);
-        });
-      });
+      uploadTask.then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((downloadURL) => {
+          postData.imageUrl = downloadURL;
+          addDoc(postCollectionRef, postData).then((docRef) => {
+            observer.next(docRef.id);
+          }).catch((error) => observer.error('Error creating a post: ' + error));
+        }).catch((error) => observer.error('Error getting download URL: ' + error));
+      }).catch((error) => observer.error('Error uploading image: ' + error));
+    } else {
+      // If there's no image file, proceed to create the post without an imageUrl
+      addDoc(postCollectionRef, postData).then((docRef) => {
+        observer.next(docRef.id);
+      }).catch((error) => observer.error('Error creating a post: ' + error));
     }
-  }
+  });
+}
+
+
   
 
   
@@ -144,7 +131,7 @@ editPost(postId: string, updatedContent: string): Observable<void> {
   const updatedData = { content: updatedContent };
 
   return new Observable<void>((observer) => {
-    updateDoc(postRef, updatedData)
+    updateDoc(postRef, updatedData) 
       .then(() => {
         observer.next();
       })
@@ -193,13 +180,27 @@ deletePost(postId: string, userId: string): Observable<void> {
 // Get all posts
 getPosts(): Observable<any[]> {
   const postCollectionRef = collection(this.firestore, 'posts');
-
   return collectionData(postCollectionRef, { idField: 'postId' }).pipe(
     map((posts) => posts.map((post) => ({ id: post.postId, ...post })))
   );
 }
 
+getPostsByGroupId(groupId: string): Observable<any[]> {
+  const postCollectionRef = collection(this.firestore, 'posts');
+  const q = query(postCollectionRef, where('groupId', '==', groupId));
+  return collectionData(q, { idField: 'postId' }).pipe(
+    map((posts) => posts.map((post) => ({ id: post.postId, ...post })))
+  );
+}
 
+// Method to fetch and set groupId based on user membership
+getGroupIdForUser(userId: string): Observable<string | null> {
+  const groupsCollectionRef = collection(this.firestore, 'groups');
+  const q = query(groupsCollectionRef, where('members', 'array-contains', userId));
+  return collectionData(q, { idField: 'groupId' }).pipe(
+    map((groups) => groups.length ? groups[0].groupId : null)
+  );
+}
 
 
 

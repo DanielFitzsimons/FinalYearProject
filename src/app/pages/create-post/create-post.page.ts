@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { read } from 'fs';
+import { Observable } from 'rxjs';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { AuthenticationService } from 'src/app/services/authentication.service';
+import { User } from 'src/app/models/model/model';
 @Component({
   selector: 'app-create-post',
   templateUrl: './create-post.page.html',
@@ -13,6 +14,11 @@ export class CreatePostPage implements OnInit {
   selectedImageFile: File | undefined;
   postContent: string = '';
   previewImageUrl: string | undefined;
+  groupId?: string;
+
+  userId: string | null = null;
+
+  //currentUserProfile$: Observable<UserProfileService | undefined>;
 
   constructor(
     private dialog: MatDialog,
@@ -20,8 +26,28 @@ export class CreatePostPage implements OnInit {
     private auth: AuthenticationService,
     ) { }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+      const user = this.auth.getCurrentUser(); // Assuming this is synchronous and can return null
+      if (user) {
+        this.userId = user.uid;
+        this.userProfileService.getGroupIdForUser(user.uid).subscribe(
+          (groupId: string | null) => { // Explicit type here
+            if (groupId) {
+              this.groupId = groupId;
+            } else {
+              console.error('No group found for this user.');
+            }
+          },
+          (error: any) => { // Explicit type here, though it's better to use a more specific type if possible
+            console.error('Error fetching group for user:', error);
+          }
+        );
+      } else {
+        console.error('User is not logged in.');
+      }
+    }
+    
+    
   //allows for choosing a photo from system
   onPhotoSelected(event: Event) {
     const fileInput = event?.target as HTMLInputElement;
@@ -37,34 +63,40 @@ export class CreatePostPage implements OnInit {
     }
   }
   
-//handles creating of posts that links with service
   createPost() {
     const user = this.auth.getCurrentUser();
+    if (user === null) {
+      console.error('No authenticated user found');
+      return;
+    }
   
-    if (user && this.postContent) {
+    if (this.postContent && this.groupId) {
       const userId = user.uid;
   
-      this.userProfileService.createPost(userId, this.postContent, this.selectedImageFile).subscribe(
+      this.userProfileService.createPost(userId, this.postContent, this.groupId, this.selectedImageFile).subscribe(
         (result) => {
-          if (typeof result === 'string') {
-            const postId = result;
-            console.log('Post Created Successfully!', postId);
-            // Now you can use the postId as needed
-          } else {
-            console.log('Post Created Successfully!');
-          }
+          console.log('Post Created Successfully!', result);
+          // Reset fields after successfully creating a post
+          this.postContent = '';
+          this.selectedImageFile = undefined;
+          this.previewImageUrl = undefined;
+          // Handle navigation or state reset if necessary
         },
         (error) => {
-          console.log(error);
+          console.error('Error creating post:', error);
         }
       );
     } else {
-      console.log('User is not authenticated, post content is empty, or image is not selected');
+      console.error('Missing required information for post creation', {
+        isAuthenticated: user !== null,
+        postContent: !!this.postContent,
+        groupId: this.groupId
+      });
     }
-  
-    this.postContent = '';
-    this.previewImageUrl = undefined;
   }
+  
+  
+  
   
 
   

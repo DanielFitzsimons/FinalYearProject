@@ -1,12 +1,10 @@
-<!-- feed.component.html -->
 <ion-card *ngFor="let post of posts">
-  <!-- Display post content and other details -->
+  <ion-card-header>
+    <ion-card-title>{{ post.userName }}</ion-card-title> <!-- Display the user's name -->
+  </ion-card-header>
   <ion-card-content>{{ post.content }}</ion-card-content>
-  <!-- Display the image if imageUrl is present -->
   <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Post Image">
-
   <ion-button (click)="editPost(post)">Edit</ion-button>
-
   <ion-button (click)="deletePost(post)">Delete</ion-button>
 </ion-card>
 

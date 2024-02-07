@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { User } from '@angular/fire/auth';
 import { AuthenticationService } from 'src/app/services/authentication.service';
+
 @Component({
   selector: 'app-feed',
   templateUrl: './feed.component.html',
@@ -12,25 +13,54 @@ import { AuthenticationService } from 'src/app/services/authentication.service';
 export class FeedComponent implements OnInit {
   posts: any[] = [];
   userId: string = '';
+  groupId: string = '';
   constructor(private userProfileService: UserProfileService, private auth: AuthenticationService) {}
 
   ngOnInit() {
-    // Load posts from the service
-    this.loadPosts();
+    const user = this.auth.getCurrentUser();
+    if (user) {
+      this.userId = user.uid;
+      this.userProfileService.getGroupIdForUser(this.userId).subscribe(
+        (groupId) => {
+          if (groupId) {
+            this.groupId = groupId;
+            this.loadPostsForGroup(this.groupId);
+          } else {
+            console.error('No group found for this user.');
+          }
+        },
+        (error) => console.error('Error fetching group for user:', error)
+      );
+    } else {
+      console.error('User is not logged in.');
+    }
   }
-
+  
+  
+  
   loadPosts() {
-    // Call the service method to get posts
     this.userProfileService.getPosts().subscribe(
-      (posts) => {
-        this.posts = posts;
-        console.log(posts)
+      (retrievedPosts) => {
+        this.posts = retrievedPosts;
+        console.log('Posts in component:', this.posts); // This should log the posts in the component
       },
       (error) => {
-        console.error(error);
+        console.error('Error loading posts in component:', error); // Make sure errors are logged
       }
     );
   }
+  
+
+loadPostsForGroup(groupId: string) {
+  this.userProfileService.getPostsByGroupId(groupId).subscribe(
+    (retrievedPosts) => {
+      this.posts = retrievedPosts;
+      console.log('Posts for group:', this.posts);
+    },
+    (error) => console.error('Error loading posts for group:', error)
+  );
+}
+
 
 //allows for editing of post text through service
   editPost(post: any) {
