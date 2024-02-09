@@ -5,7 +5,6 @@ import { Timestamp } from "@angular/fire/firestore";
 export interface User {
     id: string;
     name: string;
-    // ... other user properties ...
   }
   
  
@@ -21,11 +20,14 @@ export interface User {
 
   export interface Message {
     id?: string;
-    conversationId: string;
+    conversationId?: string; // Make conversationId optional
+    groupId?: string; // Optionally add groupId for group messages
     sender: string;
+    senderName: string;
     content: string;
     timestamp: Timestamp;
   }
+  
   
 
   export interface Team{
@@ -33,4 +35,5 @@ export interface User {
     groupName: string;
     groupDescription?: string;
     members: string[];
+    lastMessage: string;
   }

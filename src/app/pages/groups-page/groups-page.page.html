@@ -31,6 +31,9 @@
       <ion-item *ngFor="let group of groups">
         <ion-label>{{ group.groupName }}</ion-label>
         <ion-button fill="outline" slot="end" (click)="joinGroup(group)">Join</ion-button>
+        <!-- Add this inside your *ngFor loop for displaying groups -->
+        <button (click)="deleteGroup(group.id)">Delete Group</button>
+
       </ion-item>
     </ion-list>
   </div>

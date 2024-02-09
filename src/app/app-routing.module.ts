@@ -43,6 +43,10 @@ const routes: Routes = [
     path: 'groups-page',
     loadChildren: () => import('./pages/groups-page/groups-page.module').then( m => m.GroupsPagePageModule)
   },
+  {
+    path: 'chat-page/:groupId',
+    loadChildren: () => import('./pages/chat-page/chat-page.module').then( m => m.ChatPagePageModule)
+  },
   
 ];
 

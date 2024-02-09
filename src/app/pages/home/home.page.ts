@@ -20,6 +20,20 @@ export class HomePage {
     private router: Router,
     private dialog: MatDialog 
   ) {}
+  
+  ngOnInit(){
+    // Inside a component that needs user information
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        // User is signed in
+        console.log(user);
+      } else {
+        // User is null, meaning not signed in or the state has not been restored yet
+        console.log('User is not signed in');
+      }
+    });
+
+  }
 
   async logout(){
     await this.authService.logout();

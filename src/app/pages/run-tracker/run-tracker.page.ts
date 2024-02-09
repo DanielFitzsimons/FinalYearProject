@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { HttpClient } from '@angular/common/http';
+import { AuthenticationService } from 'src/app/services/authentication.service';
 
 @Component({
   selector: 'app-run-tracker',
@@ -25,11 +26,22 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
   startLocation: google.maps.LatLng | null = null;
   distanceFromStart: number = 0;  // Distance in meters
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth: AuthenticationService) {}
 
   ngOnInit() {}
 
   ngAfterViewInit() {
+    // Inside a component that needs user information
+    this.auth.currentUser$.subscribe(user => {
+      if (user) {
+        // User is signed in
+        console.log(user);
+      } else {
+        // User is null, meaning not signed in or the state has not been restored yet
+        console.log('User is not signed in');
+      }
+    });
+
     // Load the map and set the current position after the view has been initialized
     this.loadMap();
     this.setCurrentPosition();
@@ -214,7 +226,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
       timeout: 5000,
       enableHighAccuracy: true,
     };
-  
+   
     this.watchId = Geolocation.watchPosition(options, (position, err) => {
       if (position) {
         console.log("Live tracking position: ", position);
