@@ -36,6 +36,8 @@
     <button (click)="sendMessage(newMessage)">Send</button>
   </div>
 
+ 
+
 
 <!-- In MessagingPage template -->
 <app-messaging-interface
@@ -44,6 +46,16 @@
   [currentUserId]="currentUserId"
   (messageSend)="sendMessage($event)"> <!-- Bind to sendMessage method -->
 </app-messaging-interface>
+
+<div class="ion-padding">
+  <h2>My Group Chats</h2>
+  <ion-list>
+    <ion-item *ngFor="let group of groups" (click)="openGroupChat(group)">
+      <ion-label>{{ group.groupName }}</ion-label>
+      <ion-note slot="end">{{ group.lastMessage }}</ion-note>
+    </ion-item>
+  </ion-list>
+</div> 
 
 
 

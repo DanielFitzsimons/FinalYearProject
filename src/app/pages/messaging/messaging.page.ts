@@ -6,6 +6,9 @@ import { Firestore, collection } from '@angular/fire/firestore';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { Conversation, Message, User } from 'src/app/models/model/model';
+import { Team } from 'src/app/models/model/model';
+import { Router } from '@angular/router';
+import { GroupService } from 'src/app/services/group.service';
 
 @Component({
   selector: 'app-messaging',
@@ -25,11 +28,15 @@ export class MessagingPage implements OnInit {
 
   selectedUser?: User; // Store the selected user for starting a new conversation
 
+  groups: Team[] = [];
+
   constructor(
     private messageService: MessageService, // Inject the MessageService for handling messages
     private firestore: Firestore, // Inject Firestore for database operations
     private auth: AuthenticationService, // Inject AuthenticationService for user authentication
-    private userProfileService: UserProfileService // Inject UserProfileService for user profiles
+    private userProfileService: UserProfileService, // Inject UserProfileService for user profiles
+    private router: Router,
+    private groupService: GroupService
   ) {}
 
   ngOnInit() {
@@ -54,6 +61,25 @@ export class MessagingPage implements OnInit {
     }
   );
 
+  this.auth.currentUser$.subscribe(user => {
+    if (user) {
+      this.groupService.getGroupsForUser(user.uid)
+        .then(groups => {
+          this.groups = groups;
+        })
+        .catch(error => {
+          console.error('Error fetching groups:', error);
+        });
+    } else {
+      console.error('User not authenticated');
+    }
+  });
+
+  
+
+ 
+
+
     // Get the list of all users for starting new conversations
     this.users$ = this.messageService.getUsers(); // Initialize the users Observable
   }
@@ -72,6 +98,15 @@ export class MessagingPage implements OnInit {
       });
   }
 
+  // In your GroupsPagePage component
+
+openGroupChat(group: Team) {
+  // Navigate to a new page or open a modal to display the group chat
+  // For example, using Angular Router:
+  this.router.navigate(['/chat-page', group.id]);
+}
+
+
   async sendMessage(newMessageContent: string) {
     if (!newMessageContent.trim()) {
       // If the message is only whitespace, do not send it
@@ -83,6 +118,7 @@ export class MessagingPage implements OnInit {
       const message: Message = {
         conversationId: this.currentConversationId,
         sender: this.currentUserId!,
+        senderName: '',
         content: newMessageContent,
         timestamp: Timestamp.fromDate(new Date()),
       };

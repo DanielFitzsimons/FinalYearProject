@@ -1,0 +1,31 @@
+<!-- Example group-chat.page.html -->
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/messaging">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Group Chat</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let message of messages">
+      <ion-label class="message-content">
+        <h2>{{ message.sender }}</h2>
+        <p>{{ message.content }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-item>
+      <ion-input [(ngModel)]="newMessageContent" placeholder="Type a message..."></ion-input>
+      <ion-button (click)="sendMessage()">Send</ion-button> 
+    </ion-item>
+  </ion-toolbar>
+</ion-footer>

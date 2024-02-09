@@ -29,6 +29,22 @@ export class MessageService {
       timestamp: message.timestamp || Timestamp.fromDate(new Date()),
     });
   }
+
+   // This method sends a message to a specific group chat
+   async sendMessageToGroupChat(groupId: string, message: Message): Promise<void> {
+    console.log('sendMessageToGroupChat called with groupId:', groupId); // Debug log for groupId
+    if (!groupId) {
+      throw new Error('groupId cannot be empty');
+    }
+    
+    const groupChatRef = doc(this.firestore, `groups/${groupId}`);
+    const messagesRef = collection(this.firestore, `${groupChatRef.path}/messages`);
+    await addDoc(messagesRef, {
+      ...message,
+      timestamp: message.timestamp || Timestamp.fromDate(new Date()),
+    });
+  }
+  
   
 
   /* getMessages(conversationId: string): Observable<Message[]> {
@@ -36,14 +52,22 @@ export class MessageService {
     const q = query(messagesRef, orderBy('timestamp', 'asc')); // Ensure messages are ordered correctly
     return collectionData(q, { idField: 'id' }) as Observable<Message[]>;
   } */
-
+  //get messages between users 
   getMessages(groupId: string): Observable<Message[]> {
     const messagesRef = collection(this.firestore, 'groups', groupId, 'messages');
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
     return collectionData(q, { idField: 'id' }) as Observable<Message[]>;
   }
-  
 
+  // This method retrieves messages from a specific group chat
+  getGroupChatMessages(groupId: string): Observable<Message[]> {
+    const groupChatRef = doc(this.firestore, `groups/${groupId}`);
+    const messagesRef = collection(this.firestore, `${groupChatRef.path}/messages`);
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    return collectionData(q, { idField: 'id' }) as Observable<Message[]>;
+  }
+  
+  //create conversation with another user.
   async createConversation(participants: { userId: string, userName: string }[]): Promise<string> {
     const conversationsRef = collection(this.firestore, 'conversations');
     const newConversationData = {
@@ -54,6 +78,19 @@ export class MessageService {
     };
     const conversationDocRef = await addDoc(conversationsRef, newConversationData);
     return conversationDocRef.id; // Return the new conversation ID
+  }
+
+  // This method creates a new group chat when a new group is created
+  async createGroupChat(groupId: string, creatorUserId: string): Promise<void> {
+    const groupChatRef = doc(this.firestore, `groups/${groupId}`);
+    const messagesRef = collection(this.firestore, `${groupChatRef.path}/messages`);
+    // Optionally, add an initial system message or leave the messages collection empty
+    await addDoc(messagesRef, {
+      content: 'Chat created', // Or any other initial message or system notification
+      timestamp: Timestamp.fromDate(new Date()),
+      senderId: creatorUserId, // The ID of the user who created the chat
+      // Add any other relevant fields for the message here
+    });
   }
 
   getConversationsForUser(userId: string): Observable<Conversation[]> {
