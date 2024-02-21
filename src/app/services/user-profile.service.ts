@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Firestore, collection, doc, getDoc, updateDoc, collectionData, deleteDoc, addDoc, query, where } from '@angular/fire/firestore';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthenticationService } from './authentication.service';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
 
@@ -67,27 +67,25 @@ updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observa
 
 
   // Update user profile data
-  updateUserProfile(formData: FormGroup): Observable<void> {
-    const user = this.auth.getCurrentUser();
+  // Update user profile data
+updateUserProfile(uid: string, formData: FormGroup): Observable<void> {
+  if (uid && formData.valid) {
+    const userProfileRef = doc(this.firestore, `users/${uid}`);
+    const newProfile = formData.value;
 
-    if (user && formData.valid) {
-      const uid = user.uid;
-      const userProfileRef = doc(this.firestore, `users/${uid}`);
-      const newProfile = formData.value;
-
-      return new Observable<void>((observer) => {
-        updateDoc(userProfileRef, newProfile).then(() => {
-          observer.next();
-        }).catch((error) => {
-          observer.error('Error updating user profile: ' + error);
-        });
+    return new Observable<void>((observer) => {
+      updateDoc(userProfileRef, newProfile).then(() => {
+        observer.next();
+        observer.complete();
+      }).catch((error) => {
+        observer.error('Error updating user profile: ' + error);
       });
-    } else {
-      return new Observable<void>((observer) => {
-        observer.error('User not authenticated or form is invalid');
-      });
-    }
+    });
+  } else {
+    return throwError(() => 'User not authenticated or form is invalid');
   }
+}
+
 
  // Create a post with optional image
  createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {

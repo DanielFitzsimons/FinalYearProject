@@ -6,6 +6,8 @@ import { AuthenticationService } from 'src/app/services/authentication.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 
+import { Observable, switchMap, map } from 'rxjs';
+
 import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-chat-page',
@@ -34,6 +36,7 @@ export class ChatPagePage implements OnInit {
         
         if (this.groupId) {
           this.loadMessages();
+          this.setCurrentUserId();
         } else {
           console.error('No groupId found in route parameters.');
         }
@@ -48,7 +51,16 @@ export class ChatPagePage implements OnInit {
     }
   }
 
-  async sendMessage() {
+  
+setCurrentUserId() {
+  this.authService.getCurrentUser().subscribe(user => {
+    if (user) {
+      this.currentUserId = user.uid;
+    }
+  });
+}
+
+ /* async sendMessage() {
     // Trim the newMessageContent to remove any leading/trailing whitespace
     const trimmedContent = this.newMessageContent.trim();
     console.log('Attempting to send message:', trimmedContent); // Check the trimmed message content
@@ -83,18 +95,58 @@ export class ChatPagePage implements OnInit {
     } else {
       console.log('Message content is empty or only whitespace.'); // Message content is not valid
     }
-  }
+  } */
 
 
-  async fetchUserProfile(uid: string): Promise<any> {
-    // Fetch the user profile and return it
-    try {
-      const userProfile = await this.userProfileService.getUserProfile(uid).toPromise();
-      return userProfile;
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      return null;
+  sendMessage() {
+    const trimmedContent = this.newMessageContent.trim();
+  
+    if (trimmedContent) {
+      this.authService.getCurrentUser().pipe(
+        switchMap(user => {
+          if (!user) {
+            throw new Error('User is not logged in.');
+          }
+          console.log('Current user:', user); // Log the current user object
+          return this.userProfileService.getUserProfile(user.uid).pipe(
+            map(userProfile => {
+              console.log('User profile:', userProfile); // Log the user profile object
+              if (!userProfile || !userProfile.name) {
+                throw new Error('User profile is incomplete or missing the name.');
+              }
+              const message: Message = {
+                content: trimmedContent,
+                timestamp: Timestamp.fromDate(new Date()),
+                sender: user.uid,
+                senderName: userProfile.name // Check that userProfile has a 'name' property
+              };
+              console.log('Message object before sending:', message); // Log the message object before sending
+              return message;
+            })
+          );
+        }),
+        switchMap(message => {
+          // Log the message object just before attempting to send it
+          console.log('Attempting to send message:', message);
+          return this.messageService.sendMessageToGroupChat(this.groupId, message);
+        })
+      ).subscribe({
+        next: () => {
+          console.log('Message sent to group:', this.groupId);
+          this.newMessageContent = '';
+          this.loadMessages();
+        },
+        error: (error) => console.error('Error during message sending:', error)
+      });
+    } else {
+      console.log('Message content is empty or only whitespace.');
     }
+  }
+  
+
+
+  fetchUserProfile(uid: string): Observable<any> { // Replace UserProfileType with the actual type
+    return this.userProfileService.getUserProfile(uid);
   }
   
   

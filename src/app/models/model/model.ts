@@ -3,8 +3,10 @@ import { Timestamp } from "@angular/fire/firestore";
 // models.ts
 
 export interface User {
+    uid: string;
     id: string;
     name: string;
+    email: string;
   }
   
  

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SocialFitness</string>
+    <string name="title_activity_main">SocialFitness</string>
+    <string name="package_name">com.fitness.socialfitness</string>
+    <string name="custom_url_scheme">com.fitness.socialfitness</string>
+</resources>

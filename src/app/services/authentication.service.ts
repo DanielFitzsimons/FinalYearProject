@@ -10,7 +10,7 @@ import {
 } from '@angular/fire/auth';
 import { doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { LoadingController } from '@ionic/angular';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom} from 'rxjs';
 
 import { User } from '@angular/fire/auth';
 @Injectable({
@@ -89,10 +89,10 @@ export class AuthenticationService {
   }
 
   //gets the current user thats signed in
-  getCurrentUser() {
+  getCurrentUser(): Observable<User | null> {
     // Ensure that user is authenticated before returning the user object
     console.log('Current User:', this.auth.currentUser);
-    return this.auth.currentUser;
+    return authState(this.auth);
   }
  
   //to update a field for profile
@@ -109,8 +109,8 @@ export class AuthenticationService {
   //handles log out for users
   async logout() {
     try {
-      const currentUser = this.getCurrentUser();
-      const userEmail = currentUser ? currentUser.email : 'Unknown';
+      const user =  await firstValueFrom(this.getCurrentUser());
+      const userEmail = user ? user.email : 'Unknown';
   
       const loading = await this.loadingController.create({
         message: 'Logging out...',

@@ -1,20 +1,86 @@
-/* Add this to your chat-page.page.scss */
-.message-content {
-    display: block;
+ion-item {
+  &.current-user .message-content, &.other-user .message-content {
     padding: 10px;
     margin: 5px;
     border-radius: 15px;
+    overflow: hidden; /* Ensures the content does not overflow the rounded corners */
   }
-  
-  .current-user {
-    text-align: right;
-    background-color: #007bff; /* Blue background for current user's messages */
-    color: #fff; /* White text color for current user's messages */
+
+  &.current-user {
+    --background: transparent; /* Remove default background */
+    
+    .message-container {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: right; /* Align content to the right */
+    }
+
+    .message-content {
+      background-color: #007bff; /* Blue background for current user's messages */
+      color: #fff; /* White text color for current user's messages */
+    }
+
+    .sender-name {
+      color: #fff; /* White text color for better visibility */
+      font-size: 0.8em; /* Smaller font size for the sender name */
+      margin-top: 4px; /* Space between message box and sender name */
+    }
   }
-  
-  .other-user {
-    text-align: left;
-    background-color: #f0f0f0; /* Gray background for other user's messages */
-    color: #333; /* Dark text color for other user's messages */
+
+  &.other-user {
+    --background: transparent; /* Remove default background */
+    
+    .message-container {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-content {
+      background-color: #f0f0f0; /* Gray background for other user's messages */
+      color: #333; /* Dark text color for other user's messages */
+    }
+
+    .sender-name {
+      color: #333; /* Dark text color to match the message text color */
+      font-size: 0.8em; /* Smaller font size for the sender name */
+      margin-top: 4px; /* Space between message box and sender name */
+    }
   }
+}
+
+/* ... (rest of your existing SCSS) ... */
+
+
+
+
+  /* Apply styles to your message input */
+.message-input {
+  width: 100%; /* Full width */
+  padding: 10px; /* Some padding */
+  margin: 10px 0; /* Margin at the top and bottom */
+  box-sizing: border-box; /* Include padding in the width */
+  border: 2px solid #ccc; /* A light grey border */
+  border-radius: 15px; /* Rounded corners */
+  font-size: 16px; /* Increase the font size */
+}
+
+/* Style the send button */
+.send-button {
+  padding: 10px 20px; /* Top and bottom padding, left and right padding */
+  border: none; /* No border */
+  background-color: #007bff; /* Bootstrap primary color for example */
+  color: white; /* Text color */
+  font-size: 16px; /* Matching font size with the input */
+  border-radius: 15px; /* Rounded corners */
+  cursor: pointer; /* Cursor pointer when hovering over the button */
+  margin-left: 5px; /* Margin to the left of the button */
+}
+
+/* Adjust the send button on hover */
+.send-button:hover {
+  background-color: #0056b3; /* A darker shade when hovering */
+}
+
   

@@ -4,6 +4,7 @@ import { GroupService } from 'src/app/services/group.service'
 import { Team } from 'src/app/models/model/model';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { AuthenticationService } from 'src/app/services/authentication.service';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-groups-page',
   templateUrl: './groups-page.page.html',
@@ -71,10 +72,8 @@ export class GroupsPagePage implements OnInit {
   
 
   async joinGroup(group: Team | undefined) {
-    // First, check if 'group' and 'group.id' are defined
     if (group && group.id) {
-      const user = this.auth.getCurrentUser(); // Ensure this returns a non-null User object
-  
+      const user = await firstValueFrom(this.auth.getCurrentUser());
       if (user && user.uid) {
         try {
           await this.groupService.joinGroupAndChat(group.id, user.uid);
@@ -89,6 +88,7 @@ export class GroupsPagePage implements OnInit {
       console.error('The group or group ID is undefined. Cannot join group.');
     }
   }
+  
   
   
 
@@ -115,16 +115,16 @@ export class GroupsPagePage implements OnInit {
       const formValue = this.groupForm.value;
       const groupName = formValue.groupName ?? '';
       const groupDescription = formValue.groupDescription ?? '';
-      const creatorUserId = this.auth.getCurrentUser(); // Ensure this returns a non-null User object
-  
-      if (creatorUserId && creatorUserId.uid) {
+      const user = await firstValueFrom(this.auth.getCurrentUser());
+      
+      if (user && user.uid) {
         try {
           const groupId = await this.groupService.createGroupAndChat({
             groupName,
             groupDescription,
-            members: [] ,// Initially empty, creator will be added in service
+            members: [], // Initially empty, creator will be added in service
             lastMessage: ''
-          }, creatorUserId.uid);
+          }, user.uid);
   
           console.log('Group created with ID:', groupId);
         } catch (error) {
@@ -135,6 +135,7 @@ export class GroupsPagePage implements OnInit {
       }
     }
   }
+  
   
   
   

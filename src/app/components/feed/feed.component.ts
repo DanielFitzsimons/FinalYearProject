@@ -17,24 +17,26 @@ export class FeedComponent implements OnInit {
   constructor(private userProfileService: UserProfileService, private auth: AuthenticationService) {}
 
   ngOnInit() {
-    const user = this.auth.getCurrentUser();
-    if (user) {
-      this.userId = user.uid;
-      this.userProfileService.getGroupIdForUser(this.userId).subscribe(
-        (groupId) => {
-          if (groupId) {
-            this.groupId = groupId;
-            this.loadPostsForGroup(this.groupId);
-          } else {
-            console.error('No group found for this user.');
-          }
-        },
-        (error) => console.error('Error fetching group for user:', error)
-      );
-    } else {
-      console.error('User is not logged in.');
-    }
+    this.auth.getCurrentUser().subscribe(user => {
+      if (user) {
+        this.userId = user.uid;
+        this.userProfileService.getGroupIdForUser(this.userId).subscribe(
+          (groupId) => {
+            if (groupId) {
+              this.groupId = groupId;
+              this.loadPostsForGroup(this.groupId);
+            } else {
+              console.error('No group found for this user.');
+            }
+          },
+          (error) => console.error('Error fetching group for user:', error)
+        );
+      } else {
+        console.error('User is not logged in.');
+      }
+    });
   }
+  
   
   
   
@@ -99,30 +101,28 @@ loadPostsForGroup(groupId: string) {
 
   //allows for deletin of posts through service
   deletePost(post: any) {
-    // Get the current user from your authentication service
-    const currentUser: User | null = this.auth.getCurrentUser();
+    this.auth.getCurrentUser().subscribe(currentUser => {
+      if (currentUser) {
+        const currentUserId: string = currentUser.uid; // Extract UID from the User object
   
-    if (currentUser) {
-      const currentUserId: string = currentUser.uid; // Extract UID from the User object
+        const confirmDelete = confirm('Are you sure you want to delete this post?');
   
-      const confirmDelete = confirm('Are you sure you want to delete this post?');
-  
-      if (confirmDelete) {
-        this.userProfileService.deletePost(post.id, currentUserId).subscribe(
-          () => {
-            console.log('Post deleted successfully!');
-            // Reload posts after deletion
-            this.loadPosts();
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
+        if (confirmDelete) {
+          this.userProfileService.deletePost(post.id, currentUserId).subscribe(
+            () => {
+              console.log('Post deleted successfully!');
+              // Reload posts after deletion
+              this.loadPosts();
+            },
+            (error) => {
+              console.log(error);
+            }
+          );
+        }
+      } else {
+        console.log('User not authenticated');
       }
-    } else {
-      console.log('User not authenticated');
-    }
+    });
   }
-
-}
+}  
 
