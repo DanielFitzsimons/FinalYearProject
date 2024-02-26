@@ -43,25 +43,33 @@ export class FeedComponent implements OnInit {
   loadPosts() {
     this.userProfileService.getPosts().subscribe(
       (retrievedPosts) => {
-        this.posts = retrievedPosts;
-        console.log('Posts in component:', this.posts); // This should log the posts in the component
+        // Convert Firestore Timestamps to JavaScript Date objects
+        this.posts = retrievedPosts.map(post => ({
+          ...post,
+          timestamp: post.timestamp.toDate() // Assuming 'timestamp' is the field with the Firestore Timestamp
+        }));
+        console.log('Posts in component:', this.posts);
       },
       (error) => {
-        console.error('Error loading posts in component:', error); // Make sure errors are logged
+        console.error('Error loading posts in component:', error);
       }
     );
   }
   
 
-loadPostsForGroup(groupId: string) {
-  this.userProfileService.getPostsByGroupId(groupId).subscribe(
-    (retrievedPosts) => {
-      this.posts = retrievedPosts;
-      console.log('Posts for group:', this.posts);
-    },
-    (error) => console.error('Error loading posts for group:', error)
-  );
-}
+  loadPostsForGroup(groupId: string) {
+    this.userProfileService.getPostsByGroupId(groupId).subscribe(
+      (retrievedPosts) => {
+        // Convert Firestore Timestamps to JavaScript Date objects
+        this.posts = retrievedPosts.map(post => ({
+          ...post,
+          timestamp: post.timestamp.toDate() // Assuming 'timestamp' is the field with the Firestore Timestamp
+        }));
+        console.log('Posts for group:', this.posts);
+      },
+      (error) => console.error('Error loading posts for group:', error)
+    );
+  }
 
 
 //allows for editing of post text through service
@@ -73,7 +81,7 @@ loadPostsForGroup(groupId: string) {
         () => {
           console.log('Post updated successfully!');
           // Reload posts after updating
-          this.loadPosts();
+          this.loadPostsForGroup(this.groupId);
         },
         (error) => {
           console.log(error);
@@ -112,7 +120,7 @@ loadPostsForGroup(groupId: string) {
             () => {
               console.log('Post deleted successfully!');
               // Reload posts after deletion
-              this.loadPosts();
+              this.loadPostsForGroup(this.groupId);
             },
             (error) => {
               console.log(error);

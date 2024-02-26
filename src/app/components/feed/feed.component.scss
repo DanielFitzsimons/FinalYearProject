@@ -1,17 +1,46 @@
-/* create-post.page.scss */
-
 ion-card {
-    width: 80%; /* Adjust the width to your preference */
-    max-width: 400px; /* Set a maximum width if needed */
-    margin: 10px auto; /* Center the card horizontally and add some margin */
-  }
-  
+  width: 80%;
+  max-width: 500px; // Increase the max width for better readability on larger screens
+  margin: 20px auto; // Increase margin for better spacing
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Subtle shadow for depth
+  border-radius: 8px; // Rounded corners for modern look
 
-  
-  img {
-    max-width: 100%; /* Make sure images don't exceed the width of their container */
-    height: auto; /* Maintain the aspect ratio of the images */
-    display: block; /* Remove any default spacing around images */
-    margin: 0 auto; /* Center the images horizontally */
+  ion-card-header {
+    padding: 16px; // Padding for spacing inside the header
+    background-color: #f8f8f8; // Slightly off-white background for the header
+    ion-card-title {
+      font-size: 1.2em; // Larger font size for title
+      font-weight: bold; // Bold font weight for title
+    }
+    ion-card-subtitle {
+      font-size: 0.9em; // Smaller font size for subtitle
+      color: #a1a1a1; // Subdued color for subtitle
+    }
   }
-  
+
+  ion-card-content {
+    padding: 16px; // Padding for spacing inside the content
+    font-size: 1em; // Base font size for content
+    line-height: 1.6; // Line height for better readability
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto; // Add margin for spacing around the image
+    border-radius: 4px; // Rounded corners for images
+  }
+
+  ion-button {
+    --background: #387ef5; // Use a consistent color for buttons
+    --background-activated: #3367d6; // Slightly darker color for the activated state
+    margin: 0 8px 8px 8px; // Margins for spacing around buttons
+    &:first-child {
+      margin-left: 16px; // Additional margin for the first button
+    }
+    &:last-child {
+      margin-right: 16px; // Additional margin for the last button
+    }
+  }
+}
