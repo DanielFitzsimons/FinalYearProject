@@ -1,8 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-button routerLink="/home">
-      <ion-icon name="arrow-back"></ion-icon>
-    </ion-button>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-title>Run Tracker</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -24,13 +26,15 @@
       <ion-select-option value="10">10</ion-select-option>
     </ion-select>
   </ion-item>
-  <!-- Button to Map the Run -->
-  <ion-button (click)="startTracking()">Map Run</ion-button>
 
-  <!-- Button to Start Tracking the User -->
-  <ion-button (click)="beginRun()">Start Run</ion-button>
 
-  <ion-button (click)="stopRun()">End Run</ion-button>
+  <div class="button-container">
+    <ion-button class="map-run-button" (click)="startTracking()">Map Run</ion-button>
+    <ion-button class="start-run-button" (click)="beginRun()">Start Run</ion-button>
+    <ion-button class="end-run-button" (click)="stopRun()">End Run</ion-button>
+  </div>
+  
+
 
 
   <!-- Grid Layout for Displaying Information -->

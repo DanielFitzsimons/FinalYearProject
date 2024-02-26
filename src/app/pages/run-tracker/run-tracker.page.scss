@@ -1,17 +1,70 @@
-/* Add this CSS to increase the font size of the text */
+/* Add this SCSS to increase the font size of the text */
 .custom-card {
-    font-size: 24px; /* Adjust the font size as needed */
-  }
+  font-size: 24px; /* Adjust the font size as needed */
+}
 
-
-  /* Global CSS file or local CSS within your component */
+/* Global SCSS file or local SCSS within your component */
 .center-content {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Target specific buttons instead of the global ion-button tag */
+.map-run-button, .start-run-button, .end-run-button {
+  font-size: 1.2em;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.3s;
+  
+  &:hover {
+    --background: var(--ion-color-primary-dark);
   }
-  
-  
+
+  &:active {
+    transform: translateY(2px);
+    transform: scale(0.98);
+  }
+}
+
+/* Updated .button-container class for side-by-side centering */
+.button-container {
+  display: flex;
+  justify-content: center; /* Center the buttons horizontally */
+  align-items: center; /* Center the buttons vertically if the container has a specified height */
+  flex-direction: row; /* Line up the buttons horizontally */
+  /* Removed the height property as it is not needed for horizontal centering */
+}
+
+.map-run-button {
+  --background: var(--ion-color-secondary); /* Secondary color for the map button */
+}
+
+.start-run-button {
+  --background: green; /* Green color for start */
+}
+
+.end-run-button {
+  --background: red; /* Red color for stop */
+}
+
+ion-button:hover {
+  --background: var(--ion-color-primary-dark); /* Darken the button on hover */
+}
+
+ion-button:active {
+  transform: scale(0.98); /* Slight shrink effect on click */
+}
+
+@media (max-width: 600px) {
+  ion-button {
+    font-size: 1em;
+    padding: 8px 16px;
+  }
+}
