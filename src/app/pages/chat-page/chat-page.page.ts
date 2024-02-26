@@ -21,6 +21,8 @@ export class ChatPagePage implements OnInit {
 
   currentUserId: string = ''
 
+  isSending: boolean = false;
+
   constructor(
     private messageService: MessageService, 
     private authService: AuthenticationService,
@@ -102,46 +104,44 @@ setCurrentUserId() {
     const trimmedContent = this.newMessageContent.trim();
   
     if (trimmedContent) {
+      this.isSending = true; // Start sending, show progress bar
+  
       this.authService.getCurrentUser().pipe(
         switchMap(user => {
           if (!user) {
             throw new Error('User is not logged in.');
           }
-          console.log('Current user:', user); // Log the current user object
           return this.userProfileService.getUserProfile(user.uid).pipe(
             map(userProfile => {
-              console.log('User profile:', userProfile); // Log the user profile object
-              if (!userProfile || !userProfile.name) {
-                throw new Error('User profile is incomplete or missing the name.');
-              }
               const message: Message = {
                 content: trimmedContent,
                 timestamp: Timestamp.fromDate(new Date()),
                 sender: user.uid,
-                senderName: userProfile.name // Check that userProfile has a 'name' property
+                senderName: userProfile.name
               };
-              console.log('Message object before sending:', message); // Log the message object before sending
               return message;
             })
           );
         }),
         switchMap(message => {
-          // Log the message object just before attempting to send it
-          console.log('Attempting to send message:', message);
           return this.messageService.sendMessageToGroupChat(this.groupId, message);
         })
       ).subscribe({
         next: () => {
-          console.log('Message sent to group:', this.groupId);
+          this.isSending = false; // Message sent, hide progress bar
           this.newMessageContent = '';
           this.loadMessages();
         },
-        error: (error) => console.error('Error during message sending:', error)
+        error: (error) => {
+          this.isSending = false; // Error occurred, hide progress bar
+          console.error('Error during message sending:', error);
+        }
       });
     } else {
       console.log('Message content is empty or only whitespace.');
     }
   }
+  
   
 
 

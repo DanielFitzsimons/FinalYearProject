@@ -1,61 +1,69 @@
 ion-item {
-  &.current-user .message-content, &.other-user .message-content {
-    padding: 10px;
-    margin: 5px;
-    border-radius: 15px;
-    overflow: hidden; /* Ensures the content does not overflow the rounded corners */
+  display: flex;
+  flex-direction: row; // Make sure the main axis is horizontal
+  padding: 0;
+  width: 100%;
+  --background: transparent;
+
+  &.current-user,
+  &.other-user {
+    justify-content: flex-start; // Align other users' messages to the start (left)
+    width: 100%; // Full width to allow alignment
+    .message-container {
+      max-width: 80%; // Limit the message width
+      margin-bottom: 12px;
+      border-radius: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .message-content {
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 1rem;
+    }
+    .sender-name,
+    .message-timestamp {
+      font-size: 0.8rem;
+      color: #a1a1a1;
+    }
   }
 
   &.current-user {
-    --background: transparent; /* Remove default background */
-    
+    justify-content: flex-end; // Align current user's messages to the end (right)
     .message-container {
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      align-items: right; /* Align content to the right */
+      margin-left: auto; // Push the container to the right
+      margin-right: 0; // Align to the right edge
     }
-
     .message-content {
-      background-color: #007bff; /* Blue background for current user's messages */
-      color: #fff; /* White text color for current user's messages */
-    }
-
-    .sender-name {
-      color: #fff; /* White text color for better visibility */
-      font-size: 0.8em; /* Smaller font size for the sender name */
-      margin-top: 4px; /* Space between message box and sender name */
+      background-color: #3880ff;
+      color: white;
+      position: relative;
     }
   }
 
   &.other-user {
-    --background: transparent; /* Remove default background */
-    
     .message-container {
-      text-align: left;
-      display: flex;
-      flex-direction: column;
+      margin-right: auto; // Push the container to the left
+      margin-left: 0; // Align to the left edge
     }
-
     .message-content {
-      background-color: #f0f0f0; /* Gray background for other user's messages */
-      color: #333; /* Dark text color for other user's messages */
-    }
-
-    .sender-name {
-      color: #333; /* Dark text color to match the message text color */
-      font-size: 0.8em; /* Smaller font size for the sender name */
-      margin-top: 4px; /* Space between message box and sender name */
+      background-color: #f0f0f0;
+      color: black;
+      position: relative;
     }
   }
 }
 
-/* ... (rest of your existing SCSS) ... */
 
 
 
+ion-item.current-user ion-label,
+ion-item.current-user p {
+  color: white !important;
+}
 
-  /* Apply styles to your message input */
+
+/* Apply styles to your message input */
 .message-input {
   width: 100%; /* Full width */
   padding: 10px; /* Some padding */
@@ -82,5 +90,3 @@ ion-item {
 .send-button:hover {
   background-color: #0056b3; /* A darker shade when hovering */
 }
-
-  

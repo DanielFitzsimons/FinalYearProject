@@ -10,14 +10,18 @@
 </ion-header>
 
 <ion-content>
+  <!-- Progress Bar appears when isSending is true -->
+  <ion-progress-bar *ngIf="isSending" type="indeterminate" value="1.0"></ion-progress-bar>
   <ion-list>
     <!-- Loop over messages and apply different classes based on the sender -->
     <ion-item *ngFor="let message of messages" [class.current-user]="message.sender === currentUserId" [class.other-user]="message.sender !== currentUserId">
       <div class="message-container">
-        <ion-label class="message-content">
+        <!-- Use ion-label only if necessary for Ionic components -->
+        <div class="message-content">
           <p>{{ message.content }}</p>
-        </ion-label>
+        </div>
         <div class="sender-name">{{ message.senderName }}</div>
+        <div class="message-timestamp">{{ message.timestamp.toDate() | date:'short' }}</div>
       </div>
     </ion-item>
   </ion-list>
