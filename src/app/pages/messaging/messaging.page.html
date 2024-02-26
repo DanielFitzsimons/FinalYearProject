@@ -1,16 +1,17 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>messaging</ion-title>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Messages
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">messaging</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-button routerLink="/home">Home</ion-button>
+
 
   
 
@@ -36,9 +37,6 @@
     <button (click)="sendMessage(newMessage)">Send</button>
   </div>
 
- 
-
-
 <!-- In MessagingPage template -->
 <app-messaging-interface
   *ngIf="currentConversationId"
@@ -61,7 +59,7 @@
 
     
   
-    <!-- Updated list to open conversations 
+    <!--  
     <ion-list>
       <ion-item *ngFor="let user of users$ | async" (click)="openConversationWithUser(user)">
         <ion-label>

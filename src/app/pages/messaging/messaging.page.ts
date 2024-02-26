@@ -41,7 +41,6 @@ export class MessagingPage implements OnInit {
 
   ngOnInit() {
     this.conversations = []; // Initialize conversations array
-    // Ensure the user is authenticated before accessing the user profile
 
     // Subscribe to the auth state observable
     this.auth.currentUser$.subscribe( // Listen for changes in the current user's authentication state
@@ -53,7 +52,7 @@ export class MessagingPage implements OnInit {
       } else {
         // User is not authenticated
         console.error('User not authenticated');
-        // Redirect to login or disable messaging functionality
+       
       }
     },
     error => {
@@ -74,12 +73,6 @@ export class MessagingPage implements OnInit {
       console.error('User not authenticated');
     }
   });
-
-  
-
- 
-
-
     // Get the list of all users for starting new conversations
     this.users$ = this.messageService.getUsers(); // Initialize the users Observable
   }
@@ -98,11 +91,9 @@ export class MessagingPage implements OnInit {
       });
   }
 
-  // In your GroupsPagePage component
+
 
 openGroupChat(group: Team) {
-  // Navigate to a new page or open a modal to display the group chat
-  // For example, using Angular Router:
   this.router.navigate(['/chat-page', group.id]);
 }
 
@@ -186,7 +177,6 @@ openGroupChat(group: Team) {
       return newConversationId;
     } catch (error) {
       console.error('Error creating conversation:', error);
-      // Handle the error as needed
       return undefined;
     }
   }
