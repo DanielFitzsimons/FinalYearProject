@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Firestore, collection, doc, getDoc, updateDoc, collectionData, deleteDoc, addDoc, query, where } from '@angular/fire/firestore';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthenticationService } from './authentication.service';
-import { Observable, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError, Subject } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
 
 @Injectable({
@@ -14,6 +14,11 @@ export class UserProfileService {
   imageData: any;
 
   groupId?: string;
+
+   // A subject to emit upload progress
+   private uploadProgress = new Subject<number>();
+   // Observable to expose to components
+   public uploadProgress$ = this.uploadProgress.asObservable();
  
 
   constructor(
@@ -66,7 +71,7 @@ updateUserProfileField(uid: string, fieldName: string, fieldValue: any): Observa
 }
 
 
-  // Update user profile data
+  
   // Update user profile data
 updateUserProfile(uid: string, formData: FormGroup): Observable<void> {
   if (uid && formData.valid) {
@@ -87,37 +92,48 @@ updateUserProfile(uid: string, formData: FormGroup): Observable<void> {
 }
 
 
- // Create a post with optional image
- createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {
+createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {
   const postCollectionRef = collection(this.firestore, 'posts');
-  let postData: any = {
-    userId,
-    content: postContent,
-    groupId, // Include groupId in the post data
-    timestamp: new Date(),
-  };
+  
+  // Fetch the user's profile to get the username
+  return this.getUserProfile(userId).pipe(
+    switchMap((userProfile) => {
+      let postData: any = {
+        userId,
+        userName: userProfile.name, // Assuming the username is stored under the key 'userName'
+        content: postContent,
+        groupId,
+        timestamp: new Date(),
+      };
 
-  return new Observable<string | void>((observer) => {
-    if (imageFile) {
-      const storageRef = ref(this.storage, `post-images/${imageFile.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, imageFile);
+      return new Observable<string | void>((observer) => {
+        if (imageFile) {
+          const storageRef = ref(this.storage, `post-images/${imageFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
-      uploadTask.then((snapshot) => {
-        getDownloadURL(snapshot.ref).then((downloadURL) => {
-          postData.imageUrl = downloadURL;
+          uploadTask.then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              postData.imageUrl = downloadURL;
+              addDoc(postCollectionRef, postData).then((docRef) => {
+                observer.next(docRef.id);
+              }).catch((error) => observer.error('Error creating a post: ' + error));
+            }).catch((error) => observer.error('Error getting download URL: ' + error));
+          }).catch((error) => observer.error('Error uploading image: ' + error));
+        } else {
+          // If there's no image file, proceed to create the post without an imageUrl
           addDoc(postCollectionRef, postData).then((docRef) => {
             observer.next(docRef.id);
           }).catch((error) => observer.error('Error creating a post: ' + error));
-        }).catch((error) => observer.error('Error getting download URL: ' + error));
-      }).catch((error) => observer.error('Error uploading image: ' + error));
-    } else {
-      // If there's no image file, proceed to create the post without an imageUrl
-      addDoc(postCollectionRef, postData).then((docRef) => {
-        observer.next(docRef.id);
-      }).catch((error) => observer.error('Error creating a post: ' + error));
-    }
-  });
+        }
+      });
+    }),
+    catchError((error) => {
+      console.error('Error fetching user profile for post creation: ', error);
+      return throwError(() => new Error('Error fetching user profile for post creation'));
+    })
+  );
 }
+
 
 
   
@@ -198,6 +214,29 @@ getGroupIdForUser(userId: string): Observable<string | null> {
   return collectionData(q, { idField: 'groupId' }).pipe(
     map((groups) => groups.length ? groups[0].groupId : null)
   );
+}
+
+
+
+
+uploadProfilePicture(file: File): Promise<string> {
+  const path = `profilePictures/${new Date().getTime()}_${file.name}`;
+  const storageRef = ref(this.storage, path);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        // Optional: monitor upload progress
+      },
+      (error) => reject(error),
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          resolve(downloadURL);
+        });
+      }
+    );
+  });
 }
 
 

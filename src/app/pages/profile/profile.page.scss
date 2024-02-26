@@ -1,25 +1,36 @@
-/* Add this to your profile.page.scss or your global styles (styles.scss) */
+.bold-large-text {
+    font-weight: bold;
+    font-size: 1.2em; /* or any other size you prefer */
+  }
 
-/* Add this to your profile.page.scss or your global styles (styles.scss) */
 
-// ion-item {
-//     display: flex;
-//     flex-direction: column;
-//   }
+  .profile-pic-section {
+    position: relative;
+  }
   
-//   ion-item ion-input {
-//     width: calc(100% - 20px); /* Adjust as needed */
-//     margin-bottom: 10px; /* Adjust as needed */
-//   }
+  .upload-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    --button-color: rgba(0, 0, 0, 0.7); /* Adjust color as needed */
+  }
   
-//   ion-item ion-button {
-//     align-self: flex-end;
-//     margin-left: 10px; /* Adjust as needed */
-//   }
+  .email-title,
+  .name-title,
+  .age-title {
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+  }
   
-/* Add this to your profile.page.scss or your global styles (styles.scss) */
-
-
+  .name-title {
+    font-weight: bold;
+    font-size: 1.2em; /* Adjust size as needed */
+  }
+  
+  .age-title {
+    font-size: 1em; /* Adjust size as needed */
+  }
+  
   
  
-  

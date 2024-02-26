@@ -1,5 +1,5 @@
 // Import necessary Angular and Firebase modules, services, and dependencies
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,  } from '@angular/core';
 import { Firestore, doc, getDoc, collectionData, updateDoc, collection } from '@angular/fire/firestore';
 import { AuthenticationService } from '../../services/authentication.service';
 import { FormBuilder, Validators } from '@angular/forms';
@@ -26,13 +26,13 @@ export class ProfilePage implements OnInit {
 
   showForm: boolean = false;
 
+
+
   // Form group for user profile data with default values and validators
   profileForm = this.fb.group({
     email: [{ value: '', disabled: true }, Validators.required], // Email is disabled for editing
     name: ['', Validators.required],
     age: ['', Validators.min(18)],
-    phoneNumber: ['', Validators.minLength(10)],
-    address: ['', Validators.required],
   });
 
   // Constructor with dependency injection
@@ -86,9 +86,7 @@ loadUserProfile(uid: string) {
         this.profileForm.patchValue({
           email: userProfileData.email, // Assuming 'email' is a field in the userProfileData
           name: userProfileData.name, // Assuming 'name' is a field in the userProfileData
-          age: userProfileData.age, // Assuming 'age' is a field in the userProfileData
-          phoneNumber: userProfileData.phoneNumber, // Assuming 'phoneNumber' is a field
-          address: userProfileData.address, // Assuming 'address' is a field
+          age: userProfileData.age, // Assuming 'age' is a field in the userProfileDa // Assuming 'address' is a field
         });
         // Show the profile data in the template
         this.showProfileData = true;
@@ -231,4 +229,45 @@ loadUserProfile(uid: string) {
       await this.loading.dismiss();
     }
   }
+
+  
+  onFileChanged(event: Event) {
+    const input = event.target as HTMLInputElement; // Cast to HTMLInputElement
+    if (input && input.files && input.files.length) {
+      const file = input.files[0];
+      this.uploadFile(file);
+    }
+  }
+  
+  
+  
+  uploadFile(file: File) {
+    // Call a method from the user profile service to handle the upload
+    this.userProfileService.uploadProfilePicture(file).then((url: string) => {
+      // Assuming you have a method to update the user profile
+      this.updateUserProfilePicture(url);
+    });
+  }
+  
+  updateUserProfilePicture(imageUrl: string) {
+    // Ensure there's a UID available
+    if (!this.uid) {
+      console.error('User UID is undefined or null.');
+      return;
+    }
+  
+    // Use the UID to update the user profile with the new image URL
+    this.userProfileService.updateUserProfileField(this.uid, 'picture', imageUrl)
+      .subscribe({
+        next: () => {
+          // Handle successful update, e.g., show a success message or refresh the profile picture display
+          console.log('Profile picture updated successfully.');
+        },
+        error: (error) => {
+          console.error('Error updating profile picture:', error);
+        }
+      });
+  }
+  
+  
 }
