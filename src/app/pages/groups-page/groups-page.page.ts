@@ -5,6 +5,7 @@ import { Team } from 'src/app/models/model/model';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { firstValueFrom } from 'rxjs';
+import { Router} from '@angular/router';
 @Component({
   selector: 'app-groups-page',
   templateUrl: './groups-page.page.html',
@@ -19,8 +20,13 @@ export class GroupsPagePage implements OnInit {
 
   groups: Team[] = [];
 
+  allGroups: Team[] = [];
 
-  constructor(private fb: FormBuilder, private groupService: GroupService, private userService: UserProfileService, private auth: AuthenticationService ) {}
+  searchPerformed = false;
+
+
+
+  constructor(private fb: FormBuilder, private groupService: GroupService, private userService: UserProfileService, private auth: AuthenticationService, private router: Router ) {}
 
   ngOnInit() {
     // Inside a component that needs user information
@@ -47,28 +53,28 @@ export class GroupsPagePage implements OnInit {
     }
   } */
 
-  async fetchGroups() {
-    try {
-      this.groups = await this.groupService.getGroups();
-      for (const group of this.groups) {
-        for (let i = 0; i < group.members.length; i++) {
-          const userId = group.members[i];
-          // Wrap the observable handling in a promise to use await
-          const user = await new Promise<any>((resolve, reject) => {
-            this.userService.getUserProfile(userId).subscribe({
-              next: (userData) => resolve(userData),
-              error: (error) => reject(error)
-            });
-          });
-          // Now you can access user.name assuming the user data has a 'name' property
-          group.members[i] = user ? user.name : 'Unknown User';
-        }
-      }
-      console.log('Fetched groups:', this.groups);
-    } catch (error) {
-      console.error('Error fetching groups:', error);
-    }
+  // Inside GroupsPagePage class
+
+async fetchGroups() {
+  this.allGroups = this.groups = await this.groupService.getGroups();
+
+  try {
+    this.groups = await this.groupService.getGroups();
+    const memberInfoPromises = this.groups.map(group =>
+      Promise.all(group.members.map(userId =>
+        firstValueFrom(this.userService.getUserProfile(userId))
+      ))
+    );
+    const membersInfo = await Promise.all(memberInfoPromises);
+    this.groups.forEach((group, index) => {
+      group.members = membersInfo[index].map(user => user ? user.name : 'Unknown User');
+    });
+    console.log('Fetched groups:', this.groups);
+  } catch (error) {
+    console.error('Error fetching groups:', error);
   }
+}
+
   
 
   async joinGroup(group: Team | undefined) {
@@ -106,6 +112,24 @@ export class GroupsPagePage implements OnInit {
       console.error('Error deleting group:', error);
     }
   }
+
+  filterGroups(event: any) {
+  const searchTerm = event.detail.value.toLowerCase();
+  this.searchPerformed = true; // Update flag to indicate a search has been performed
+
+  if (!searchTerm.trim()) {
+    // Consider whether to reset to all groups or display none based on your requirements
+    this.groups = []; // Don't display any groups if no search term is entered
+  } else {
+    // Filter groups based on the search term
+    this.groups = this.allGroups.filter(group => {
+      return group.groupName.toLowerCase().includes(searchTerm) ||
+             (group.groupDescription && group.groupDescription.toLowerCase().includes(searchTerm));
+    });
+  }
+}
+
+
   
   
   
@@ -135,6 +159,15 @@ export class GroupsPagePage implements OnInit {
       }
     }
   }
+
+
+  // Inside GroupsPagePage class
+
+async goToGroupPage(group: Team) {
+  // Assuming you have a route set up for 'group-detail' page
+  this.router.navigate(['/group-detail', { id: group.id }]);
+}
+
   
   
   
