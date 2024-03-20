@@ -2,7 +2,6 @@
 
 import { Component, OnInit } from '@angular/core';
 import { UserProfileService } from 'src/app/services/user-profile.service';
-import { User } from '@angular/fire/auth';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 
 @Component({

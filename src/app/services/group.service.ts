@@ -60,8 +60,6 @@ export class GroupService {
     return groups;
   }
 
-  // In your GroupService class
-
 async getGroupById(groupId: string): Promise<Team> {
   const groupDocRef = doc(this.firestore, 'groups', groupId);
   const groupSnapshot = await getDoc(groupDocRef);

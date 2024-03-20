@@ -8,7 +8,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'landing',
+    redirectTo: 'authenticator',
     pathMatch: 'full'
   },
   {
@@ -46,6 +46,14 @@ const routes: Routes = [
   {
     path: 'chat-page/:groupId',
     loadChildren: () => import('./pages/chat-page/chat-page.module').then( m => m.ChatPagePageModule)
+  },
+  {
+    path: 'media-files',
+    loadChildren: () => import('./pages/media-files/media-files.module').then( m => m.MediaFilesPageModule)
+  },
+  {
+    path: 'group-detail',
+    loadChildren: () => import('./pages/group-detail/group-detail.module').then( m => m.GroupDetailPageModule)
   },
   
 ];

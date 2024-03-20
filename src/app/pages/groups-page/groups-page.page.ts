@@ -53,9 +53,8 @@ export class GroupsPagePage implements OnInit {
     }
   } */
 
-  // Inside GroupsPagePage class
 
-async fetchGroups() {
+/* async fetchGroups() {
   this.allGroups = this.groups = await this.groupService.getGroups();
 
   try {
@@ -69,6 +68,26 @@ async fetchGroups() {
     this.groups.forEach((group, index) => {
       group.members = membersInfo[index].map(user => user ? user.name : 'Unknown User');
     });
+    console.log('Fetched groups:', this.groups);
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+  }
+}*/
+
+async fetchGroups() {
+  try {
+    // Assuming getGroups fetches all available groups
+    const allGroups = await this.groupService.getGroups();
+    const user = await firstValueFrom(this.auth.getCurrentUser());
+
+    if (user && user.uid) {
+      // Filter groups to include only those where the current user is a member
+      this.groups = allGroups.filter(group => group.members.includes(user.uid));
+    } else {
+      console.error('User is not logged in or UID is unavailable');
+      this.groups = []; // Clear the groups or handle as needed when user is not logged in
+    }
+
     console.log('Fetched groups:', this.groups);
   } catch (error) {
     console.error('Error fetching groups:', error);

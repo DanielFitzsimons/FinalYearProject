@@ -18,9 +18,7 @@ export class LandingPage implements OnInit {
     //this.loginSheet.open(AuthenticatorComponent);
     this.dialog.open(AuthenticatorPage, {
       width: '50%', // adjust the width as needed
-      height: '70%', // adjust the height as needed
-      position: { top: '10%', left: '25%', }, // adjust the position as needed
-     
+      height: '55%', // adjust the height as needed
     })
   }
 
