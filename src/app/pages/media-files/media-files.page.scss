@@ -1,0 +1,55 @@
+/* Add some padding and margin to space out the content */
+.folder-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+  
+  /* Style the headings for each file type section */
+  .folder-heading {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  /* Style the individual file items */
+  .file-item {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+  }
+  
+  .file-item:hover {
+    background-color: #e9ecef;
+  }
+  
+  /* Specific styles for video files to make them stand out */
+  .video-item video {
+    width: 100%; /* make video responsive */
+    max-width: 640px; /* you can set a max-width */
+    height: auto;
+  }
+  
+  /* Style for non-video files, like documents */
+  .non-video-item a {
+    text-decoration: none;
+    color: #0056b3;
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+  
+  .non-video-item a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Add a little icon or thumbnail for non-video file types */
+  .non-video-item a::before {
+    content: '📄'; /* replace with an actual icon or use a background image */
+    display: inline-block;
+    margin-right: 0.25rem;
+  }
+  

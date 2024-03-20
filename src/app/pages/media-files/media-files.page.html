@@ -1,0 +1,47 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>mediaFiles</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">mediaFiles</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="upload-container">
+    <input type="file" (change)="uploadFile($event)" accept="video/*" />
+  </div>
+
+  <div *ngFor="let video of videos">
+    <video controls [src]="video.url" width="320" height="240"></video>
+    <p>{{ video.name }}</p>
+  </div>
+
+  <div class="folder-container">
+    <ng-container *ngFor="let type of getObjectKeys(groupedFiles)">
+      <div class="folder-heading">{{ type | titlecase }}</div>
+      <div *ngFor="let file of groupedFiles[type]" class="file-item" [ngClass]="{'video-item': file.type === 'video', 'non-video-item': file.type !== 'video'}">
+        <ng-container *ngIf="file.type === 'video'; else nonVideoFiles">
+          <video controls [src]="file.url"></video>
+        </ng-container>
+        <ng-template #nonVideoFiles>
+          <!-- Display a link for non-video files -->
+          <a [href]="file.url" target="_blank">{{ file.name }}</a>
+        </ng-template>
+      </div>
+    </ng-container>
+  </div>
+  
+  
+  
+  
+  
+</ion-content>
