@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Firestore, addDoc, collection, query, getDocs, doc, updateDoc, arrayUnion, deleteDoc, where} from '@angular/fire/firestore';
-import { Team } from '../models/model/model';
+import { Firestore, addDoc, collection, query, getDocs, doc, updateDoc, arrayUnion, deleteDoc, where, getDoc, serverTimestamp} from '@angular/fire/firestore';
+import { Team, Post } from '../models/model/model';
 
 @Injectable({
   providedIn: 'root'
@@ -60,7 +60,23 @@ export class GroupService {
     return groups;
   }
 
-  // GroupService
+  // In your GroupService class
+
+async getGroupById(groupId: string): Promise<Team> {
+  const groupDocRef = doc(this.firestore, 'groups', groupId);
+  const groupSnapshot = await getDoc(groupDocRef);
+
+  if (groupSnapshot.exists()) {
+    // If the document exists in the collection, cast it to the Team type and return it
+    const group = groupSnapshot.data() as Team;
+    group.id = groupSnapshot.id; // Make sure to set the ID
+    return group;
+  } else {
+    // Handle the case where the group does not exist
+    throw new Error('Group not found');
+  }
+}
+
 
 // Method to get groups for the current user
 async getGroupsForUser(userId: string): Promise<Team[]> {
@@ -109,5 +125,21 @@ async getGroupsForUser(userId: string): Promise<Team[]> {
     await updateDoc(groupRef, {
       members: arrayUnion(userId) // Add userId to the 'members' array
     });
+  }
+
+   // Method to add a post to a group
+   async addPostToGroup(post: Omit<Post, 'id'>): Promise<void> {
+    const postRef = collection(this.firestore, `groups/${post.groupId}/posts`);
+    await addDoc(postRef, {
+      ...post,
+      timestamp: serverTimestamp() // Use Firebase's server timestamp
+    });
+  }
+
+  // Method to get posts for a group
+  async getPostsByGroupId(groupId: string): Promise<Post[]> {
+    const postsCollection = collection(this.firestore, `groups/${groupId}/posts`);
+    const postsSnapshot = await getDocs(postsCollection);
+    return postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Post }));
   }
 }

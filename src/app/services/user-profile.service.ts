@@ -217,6 +217,16 @@ getGroupIdForUser(userId: string): Observable<string | null> {
 }
 
 
+// Method to fetch all groupIds based on user membership
+getGroupIdsForUser(userId: string): Observable<string[]> {
+  const groupsCollectionRef = collection(this.firestore, 'groups');
+  const q = query(groupsCollectionRef, where('members', 'array-contains', userId));
+  return collectionData(q, { idField: 'groupId' }).pipe(
+    map((groups) => groups.map(group => group.groupId))
+  );
+}
+
+
 
 
 uploadProfilePicture(file: File): Promise<string> {
