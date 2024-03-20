@@ -26,7 +26,7 @@ export class AuthenticatorPage implements OnInit {
     private alertController: AlertController, // <-- Inject the AlertController to handle errors and display alert messages
     private auth: AuthenticationService, // <-- Inject the AuthService to handle login and registration
     private router: Router, // <-- Inject the Router to redirect after successful login
-    private dialogRef: MatDialogRef<AuthenticatorPage>
+    //private dialogRef: MatDialogRef<AuthenticatorPage>
   ) { }
 
   ngOnInit() {
@@ -59,10 +59,10 @@ export class AuthenticatorPage implements OnInit {
     // If the user is successfully created, redirect to the home page. Otherwise, display an error.
     if (user) {
       this.router.navigateByUrl('/profile', { replaceUrl: true });
-      this.dialogRef.close();
+      //this.dialogRef.close();
       
     } else {
-      this.dialogRef.close();
+      //this.dialogRef.close();
       this.showAlert('Registration failed', 'Please try again!');
     }
 
@@ -80,9 +80,9 @@ export class AuthenticatorPage implements OnInit {
     // If the user is successfully logged in, redirect to the home page. Otherwise, display an error via alert.
     if (user) {
       this.router.navigateByUrl('/home', { replaceUrl: true });
-      this.dialogRef.close();
+      //this.dialogRef.close();
     } else {
-      this.dialogRef.close();
+      //this.dialogRef.close();
       this.showAlert('Login failed', 'Please try again!');
     }
 
@@ -103,7 +103,7 @@ export class AuthenticatorPage implements OnInit {
       'Check your inbox for the password reset link'
     );
 
-    this.dialogRef.close();
+    //this.dialogRef.close();
   }
 
   forgotPassword(){

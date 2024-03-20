@@ -1,35 +1,106 @@
-#authenticator {
+$primary-color: #488aff;
+$secondary-color: #32db64;
+$text-color: #363636;
+$background-color: #f4f4f4;
+$button-hover-color: lighten($primary-color, 10%);
+
+// Enhanced color variables
+$primary-gradient-start: #488aff;
+$primary-gradient-end: lighten($primary-color, 15%);
+$primary-color-hover: lighten($primary-color, 10%);
+$secondary-color-hover: lighten($secondary-color, 10%);
+$input-icon-color: darken($text-color, 20%);
+$input-focus-border-color: $primary-color;
+
+// Gradients
+@mixin gradient-bg($start-color, $end-color) {
+    background: $start-color; /* Old browsers */
+    background: -moz-linear-gradient(top, $start-color 0%, $end-color 100%);
+    background: -webkit-linear-gradient(top, $start-color 0%,$end-color 100%);
+    background: linear-gradient(to bottom, $start-color 0%,$end-color 100%);
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    @include gradient-bg($primary-gradient-start, $primary-gradient-end);
+  }
+
+ion-content {
+    --background: transparent;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 1em;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
+
+    @include gradient-bg($primary-gradient-start, $primary-gradient-end);
+
+
+    ion-card {
+      width: 100%;
+      max-width: 500px; // Set a maximum width for the card
+      margin: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Optional: Adds shadow for better visibility
+      // Continue with the rest of your styles for the card...
+    }
+  }
+  
+  
+
+button {
+    @include gradient-bg($primary-color, $primary-color-hover);
+    color: white; // White text for better contrast
+    transition: background-color 0.3s ease; // Smooth transition for hover effect
+    &:hover {
+        @include gradient-bg($primary-color-hover, $primary-color);
+    }
+
 }
 
-#authenticator-content{
-    width: 100%;
-    max-width: 30em;
-    padding: 1.5em;
-    max-width: 400px; /* Set the maximum width of the card */
-    margin: auto; /* Center the card horizontally */
-    margin-top: 25%; /* Center the card vertically */
-    transform: translateY(-50%); /* Adjust for vertical centering */
-
+input {
+    position: relative; // Position relative for absolute positioning of icons
+    padding-left: 2.5em; // Make space for the icon
+    transition: border-color 0.3s ease; // Smooth transition for focus effect
+    &:focus {
+        border-color: $input-focus-border-color; // Highlight border on focus
+    }
+    &::placeholder {
+        color: lighten($text-color, 20%);
+    }
 }
 
-button{
-    margin: .5em;
-
+// Icons inside input fields
+.input-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: $input-icon-color;
 }
 
-input{
-    width: 100%;
-    padding: 1em;
-    border-radius: 5px;
-    outline: none;
-    border: 1px solid rgba(15, 15, 15, .3);
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
+ion-card-header {
+    @include gradient-bg($primary-gradient-start, $primary-gradient-end);
+    // No changes here, gradient mixin will handle it
+}
+
+ion-card-title {
+    // Increased weight and size for better readability
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+a.link-text {
+    &:hover {
+        color: $secondary-color-hover;
+        text-decoration: underline; // Underline on hover for better indication
+    }
+}
+
+// Background Image
+
+
+// Apply transitions globally
+*, *:before, *:after {
+    transition: all 0.3s ease;
 }
