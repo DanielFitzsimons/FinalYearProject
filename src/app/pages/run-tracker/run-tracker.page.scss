@@ -62,9 +62,31 @@ ion-button:active {
   transform: scale(0.98); /* Slight shrink effect on click */
 }
 
+/* Adjust the font size and padding for smaller devices */
 @media (max-width: 600px) {
-  ion-button {
-    font-size: 1em;
-    padding: 8px 16px;
+  .custom-card {
+    font-size: 18px; /* Smaller font size for mobile devices */
+  }
+
+  .map-run-button, .start-run-button, .end-run-button {
+    font-size: 0.9em; /* Smaller font size for buttons on mobile */
+    padding: 8px 16px; /* Reduced padding for mobile */
+    margin: 5px; /* Reduced margin for mobile */
+  }
+
+
+}
+
+/* For very small devices, you might want to go even smaller with your font size and padding */
+@media (max-width: 360px) {
+  .custom-card {
+    font-size: 16px; /* Even smaller font size for very small devices */
+  }
+
+  .map-run-button, .start-run-button, .end-run-button {
+    font-size: 0.8em; /* Even smaller font size for buttons on very small devices */
+    padding: 6px 12px; /* Further reduced padding for very small devices */
+    margin: 4px; /* Further reduced margin for very small devices */
   }
 }
+

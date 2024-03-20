@@ -101,6 +101,8 @@ async startTracking() {
       position.coords.longitude
     );
 
+    this.previousPosition = this.startLocation;
+
     // Generate waypoints for a rough circular route
   const waypoints = this.generateCircularPathWaypoints(startLocation, this.selectedRunDistance / 4);
 
@@ -246,15 +248,15 @@ updateUserMarkerPosition(position: any) {
     position.coords.longitude
   );
 
-  // Update distance from start
-  if (this.startLocation) {
-    this.distanceFromStart = google.maps.geometry.spherical.computeDistanceBetween(this.startLocation, newPos);
+   // Update total distance
+   if (this.previousPosition) {
+    const distanceBetweenPoints = google.maps.geometry.spherical.computeDistanceBetween(
+      this.previousPosition,
+      newPos
+    );
+    this.totalDistance += distanceBetweenPoints;
   }
 
-  // Update total distance
-  if (this.previousPosition) {
-    this.totalDistance += google.maps.geometry.spherical.computeDistanceBetween(this.previousPosition, newPos);
-  }
   this.previousPosition = newPos;
 
   // Update user marker
@@ -270,6 +272,7 @@ updateUserMarkerPosition(position: any) {
     });
   }
 }
+
 
   //method to calculate pace of user 
   calculatePace() {
