@@ -1,5 +1,5 @@
 import { Timestamp } from "@angular/fire/firestore";
-
+import { FieldValue } from "@angular/fire/firestore";
 // models.ts
 
 export interface User {
@@ -17,7 +17,7 @@ export interface User {
     lastMessage: string;
     lastMessageTimestamp: Date;
     otherUserName?: string;
-    // ... other conversation properties ...
+   
   }
 
   export interface Message {
@@ -30,7 +30,17 @@ export interface User {
     timestamp: Timestamp;
   }
   
-  
+ 
+export interface Post {
+  id?: string; // Optional because Firebase generates the ID
+  authorId: string;
+  content: string;
+  timestamp: Date; // You'll use server timestamps from Firebase
+  groupId: string; // The ID of the group this post belongs to
+  userName: string;
+  imageUrl: string;
+}
+
 
   export interface Team{
     id?: string;
