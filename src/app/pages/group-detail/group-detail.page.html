@@ -1,0 +1,49 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/groups-page">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ group?.groupName }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- The rest of your group detail template -->
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Add a New Post</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <form [formGroup]="postForm" (ngSubmit)="addPost()">
+      <ion-item>
+        <ion-label position="floating">Your Post</ion-label>
+        <ion-textarea formControlName="content"></ion-textarea>
+      </ion-item>
+      <ion-button type="submit" expand="block" [disabled]="postForm.invalid">Post</ion-button>
+    </form>
+  </ion-card-content>
+</ion-card>
+
+<!-- Posts List -->
+<ion-card *ngFor="let post of posts">
+  <ion-card-header>
+    <ion-card-title>{{ post.userName }}</ion-card-title>
+    <ion-card-subtitle>{{ post.timestamp | date:'short' }}</ion-card-subtitle>
+  </ion-card-header>
+  <ion-card-content>
+    <p>{{ post.content }}</p>
+    <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Post Image">
+  </ion-card-content>
+  <ion-row>
+    <ion-col size="6">
+      <ion-button expand="block" (click)="editPost(post)">Edit</ion-button>
+    </ion-col>
+    <ion-col size="6">
+      <ion-button expand="block" color="danger" (click)="deletePost(post)">Delete</ion-button>
+    </ion-col>
+  </ion-row>
+</ion-card>
+
+</ion-content>
