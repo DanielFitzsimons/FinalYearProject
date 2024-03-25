@@ -5,7 +5,7 @@ import { AuthenticationService } from './authentication.service';
 import { Observable, throwError, Subject } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
-
+import { RunData } from '../models/model/model';
 @Injectable({
   providedIn: 'root'
 })
@@ -92,7 +92,7 @@ updateUserProfile(uid: string, formData: FormGroup): Observable<void> {
 }
 
 
-createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {
+/* createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {
   const postCollectionRef = collection(this.firestore, 'posts');
   
   // Fetch the user's profile to get the username
@@ -132,12 +132,49 @@ createPost(userId: string, postContent: string, groupId: string, imageFile?: Fil
       return throwError(() => new Error('Error fetching user profile for post creation'));
     })
   );
+} */
+
+
+createPost(userId: string, postContent: string, groupId: string, imageFile?: File): Observable<string | void> {
+  const groupDocRef = doc(this.firestore, 'groups', groupId);
+  const postCollectionRef = collection(groupDocRef, 'posts');
+
+  return this.getUserProfile(userId).pipe(
+    switchMap((userProfile) => {
+      let postData: any = {
+        userId,
+        userName: userProfile.name, // Assuming the username is stored under the key 'userName'
+        content: postContent,
+        timestamp: new Date(),
+      };
+
+      return new Observable<string | void>((observer) => {
+        if (imageFile) {
+          const storageRef = ref(this.storage, `post-images/${imageFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+          uploadTask.then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              postData.imageUrl = downloadURL;
+              addDoc(postCollectionRef, postData).then((docRef) => {
+                observer.next(docRef.id);
+              }).catch((error) => observer.error('Error creating a post: ' + error));
+            }).catch((error) => observer.error('Error getting download URL: ' + error));
+          }).catch((error) => observer.error('Error uploading image: ' + error));
+        } else {
+          // If there's no image file, proceed to create the post without an imageUrl
+          addDoc(postCollectionRef, postData).then((docRef) => {
+            observer.next(docRef.id);
+          }).catch((error) => observer.error('Error creating a post: ' + error));
+        }
+      });
+    }),
+    catchError((error) => {
+      console.error('Error fetching user profile for post creation: ', error);
+      return throwError(() => new Error('Error fetching user profile for post creation'));
+    })
+  );
 }
-
-
-
-  
-
   
   
 editPost(postId: string, updatedContent: string): Observable<void> {
@@ -193,15 +230,15 @@ deletePost(postId: string, userId: string): Observable<void> {
  
 // Get all posts
 getPosts(): Observable<any[]> {
-  const postCollectionRef = collection(this.firestore, 'posts');
+  const postCollectionRef = collection(this.firestore, 'groups/${groupId}/posts');
   return collectionData(postCollectionRef, { idField: 'postId' }).pipe(
     map((posts) => posts.map((post) => ({ id: post.postId, ...post })))
   );
 }
 
 getPostsByGroupId(groupId: string): Observable<any[]> {
-  const postCollectionRef = collection(this.firestore, 'posts');
-  const q = query(postCollectionRef, where('groupId', '==', groupId));
+  const postCollectionRef = collection(doc(this.firestore, 'groups', groupId), 'posts');
+  const q = query(postCollectionRef);
   return collectionData(q, { idField: 'postId' }).pipe(
     map((posts) => posts.map((post) => ({ id: post.postId, ...post })))
   );
@@ -215,19 +252,6 @@ getGroupIdForUser(userId: string): Observable<string | null> {
     map((groups) => groups.length ? groups[0].groupId : null)
   );
 }
-
-
-// Method to fetch all groupIds based on user membership
-getGroupIdsForUser(userId: string): Observable<string[]> {
-  const groupsCollectionRef = collection(this.firestore, 'groups');
-  const q = query(groupsCollectionRef, where('members', 'array-contains', userId));
-  return collectionData(q, { idField: 'groupId' }).pipe(
-    map((groups) => groups.map(group => group.groupId))
-  );
-}
-
-
-
 
 uploadProfilePicture(file: File): Promise<string> {
   const path = `profilePictures/${new Date().getTime()}_${file.name}`;
@@ -248,6 +272,20 @@ uploadProfilePicture(file: File): Promise<string> {
     );
   });
 }
+
+saveRunData(runData: RunData): Promise<void> {
+  const userRunsRef = collection(this.firestore, `users/${runData.userId}/runs`);
+  return addDoc(userRunsRef, {
+    ...runData,
+    timestamp: new Date() // set the timestamp when saving the data
+  }).then(docRef => {
+    console.log("Run data saved with ID: ", docRef.id);
+  }).catch(error => {
+    console.error("Error adding run data: ", error);
+    throw new Error(error);
+  });
+}
+
 
 
 
