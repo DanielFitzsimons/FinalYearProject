@@ -23,7 +23,7 @@
           
           <!-- Profile Picture Section -->
           <ion-row>
-            <ion-col size="12" class="ion-text-center">
+            <ion-col size="12" class="profile-picture">
               <ion-avatar style="display: inline-block; margin-top: 10px;">
                 <img src="{{profile['picture']}}" alt="Profile Picture" *ngIf="profile['picture']">
               </ion-avatar>
@@ -34,14 +34,14 @@
           <ion-row>
             <ion-col size="12" class="ion-text-center">
               <ion-card-header>
-                <ion-card-title>{{ user?.email }}</ion-card-title>
+                <ion-card-title>{{ profile['name'] }}</ion-card-title>
               </ion-card-header>
             </ion-col>
           </ion-row>
           
           <ion-row>
             <ion-col size="12" class="ion-text-center bold-large-text ">
-              <div>{{ profile['name'] }}</div>
+              <div> {{ user?.email }}</div>
             </ion-col>
           </ion-row>
           <ion-row>
@@ -50,14 +50,14 @@
             </ion-col>
           </ion-row>
         </ion-grid>
+        <ion-item>
+          <ion-button expand="block" fill="outline" onclick="document.getElementById('fileInput').click()">
+            Upload Picture
+          </ion-button>
+          <input id="fileInput" type="file" (change)="onFileChanged($event)" accept="image/*" style="display: none;">
+        </ion-item>
       </ion-card>
-      <ion-item>
-        <ion-label position="stacked">Profile Picture</ion-label>
-        <ion-button fill="outline" slot="end" onclick="document.getElementById('fileInput').click()">
-          Upload Picture
-        </ion-button>
-        <input id="fileInput" type="file" (change)="onFileChanged($event)" accept="image/*" style="display: none;">
-      </ion-item>
+      
     </ng-container>
   </ng-container>
 
@@ -85,7 +85,7 @@
         <ion-row>
           <ion-col>
             <ion-item>
-              <ion-label>Name</ion-label>
+              <ion-label>Name:</ion-label>
               <ion-input formControlName="name"></ion-input>
             </ion-item>
           </ion-col>
@@ -99,7 +99,7 @@
         <ion-row>
           <ion-col>
             <ion-item>
-              <ion-label>Age</ion-label>
+              <ion-label>Age: </ion-label>
               <ion-input formControlName="age"></ion-input>
             </ion-item>
           </ion-col>

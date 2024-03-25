@@ -1,36 +1,105 @@
-.bold-large-text {
-    font-weight: bold;
-    font-size: 1.2em; /* or any other size you prefer */
+
+  ion-toolbar {
+    background: #3273dc; // Replace with your primary color
+    color: #fff;
+
+    ion-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
   }
 
+  ion-content {
+    --background: #f4f5f8; // Light grey background for the content area
 
-  .profile-pic-section {
-    position: relative;
+    ion-card {
+      margin-top: 20px;
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1);
+
+      img {
+        width: 100%; // Ensures the image takes up the full card width
+        max-height: 200px; // Limits image height
+        object-fit: cover; // Ensures the image covers the area nicely
+      }
+
+      ion-card-content {
+        ion-list {
+          border: none;
+
+          ion-item {
+            --padding-start: 0;
+            --inner-padding-end: 0;
+            --border-width: 0;
+
+            h2, h1 {
+              margin: 0.5rem 0;
+            }
+          }
+        }
+
+        ion-button {
+          --background: #3273dc; // Primary button color
+          --background-activated: #275399; // Darken color when activated
+          --border-radius: 4px;
+          margin-top: 20px;
+        }
+      }
+    }
+
+    ion-button {
+      --background: transparent;
+      --background-focused: transparent;
+      --background-hover: transparent;
+      --border-color: #3273dc; // Button border color
+      --border-style: solid;
+      --border-width: 1px;
+      --border-radius: 4px;
+      --color: #3273dc;
+      --color-activated: #275399;
+      --ripple-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  ion-card {
+    ion-card-content {
+      form {
+        ion-item {
+          --background: #ffffff; // White background for form fields
+          --border-radius: 4px;
+          --border-color: #ddd; // Light grey border for form fields
+          --border-width: 1px;
+
+          ion-label {
+            color: #363636; // Dark label color for contrast
+          }
+
+          ion-input {
+            --placeholder-color: #9a9a9a; // Light color for placeholders
+            --color: #363636; // Text color
+          }
+        }
+
+        ion-button {
+          margin-top: 20px;
+        }
+      }
+    }
+  }
+
+  ion-col {
+    display: flex;
+    justify-content: center; // This centers the avatar horizontally in the column
+    align-items: center; // This centers the avatar vertically if the column is taller than the avatar
+  
+    ion-avatar {
+      --size: 120px; // Adjust the size as needed
+      margin-top: 20px; // Add space at the top if needed
+      img {
+        width: 100%; // Ensure the image fills the avatar
+        height: auto; // Maintain the aspect ratio of the image
+        border-radius: 50%; // Makes the image round
+      }
+    }
   }
   
-  .upload-btn {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    --button-color: rgba(0, 0, 0, 0.7); /* Adjust color as needed */
-  }
-  
-  .email-title,
-  .name-title,
-  .age-title {
-    margin: 0;
-    padding: 5px;
-    text-align: center;
-  }
-  
-  .name-title {
-    font-weight: bold;
-    font-size: 1.2em; /* Adjust size as needed */
-  }
-  
-  .age-title {
-    font-size: 1em; /* Adjust size as needed */
-  }
-  
-  
- 
+
