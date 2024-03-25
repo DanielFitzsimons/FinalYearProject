@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { GroupService } from 'src/app/services/group.service'
-import { Team } from 'src/app/models/model/model';
+import { Team, User } from 'src/app/models/model/model';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { firstValueFrom } from 'rxjs';
 import { Router} from '@angular/router';
+
 @Component({
   selector: 'app-groups-page',
   templateUrl: './groups-page.page.html',
@@ -22,7 +23,12 @@ export class GroupsPagePage implements OnInit {
 
   allGroups: Team[] = [];
 
+  userGroups: Team[] = [];
+  
   searchPerformed = false;
+
+  currentUser: User | null = null;
+  
 
 
 
@@ -33,7 +39,9 @@ export class GroupsPagePage implements OnInit {
     this.auth.currentUser$.subscribe(user => {
       if (user) {
         // User is signed in
+        
         console.log(user);
+        this.fetchUserGroups();
       } else {
         // User is null, meaning not signed in or the state has not been restored yet
         console.log('User is not signed in');
@@ -41,6 +49,7 @@ export class GroupsPagePage implements OnInit {
     });
 
     this.fetchGroups();
+    
   }
 
   /* async fetchGroups(){
@@ -53,48 +62,42 @@ export class GroupsPagePage implements OnInit {
     }
   } */
 
-
-/* async fetchGroups() {
-  this.allGroups = this.groups = await this.groupService.getGroups();
-
-  try {
-    this.groups = await this.groupService.getGroups();
-    const memberInfoPromises = this.groups.map(group =>
-      Promise.all(group.members.map(userId =>
-        firstValueFrom(this.userService.getUserProfile(userId))
-      ))
-    );
-    const membersInfo = await Promise.all(memberInfoPromises);
-    this.groups.forEach((group, index) => {
-      group.members = membersInfo[index].map(user => user ? user.name : 'Unknown User');
-    });
-    console.log('Fetched groups:', this.groups);
-  } catch (error) {
-    console.error('Error fetching groups:', error);
-  }
-}*/
-
-async fetchGroups() {
-  try {
-    // Assuming getGroups fetches all available groups
-    const allGroups = await this.groupService.getGroups();
-    const user = await firstValueFrom(this.auth.getCurrentUser());
-
-    if (user && user.uid) {
-      // Filter groups to include only those where the current user is a member
-      this.groups = allGroups.filter(group => group.members.includes(user.uid));
-    } else {
-      console.error('User is not logged in or UID is unavailable');
-      this.groups = []; // Clear the groups or handle as needed when user is not logged in
+  async fetchGroups() {
+    try {
+      this.allGroups = await this.groupService.getGroups(); // Fetch all groups
+      this.groups = [...this.allGroups]; // Initially, display all groups or you could choose to display none
+      console.log('Fetched groups:', this.groups);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
     }
-
-    console.log('Fetched groups:', this.groups);
-  } catch (error) {
-    console.error('Error fetching groups:', error);
   }
-}
-
   
+  
+  async fetchUserGroups() {
+    try {
+      const user = await firstValueFrom(this.auth.getCurrentUser());
+      if (user && user.uid) {
+        this.groupService.getGroupsForUser(user.uid).subscribe(
+          (userGroups: Team[]) => {
+            this.userGroups = userGroups;
+            console.log('Fetched user groups:', this.userGroups);
+          },
+          error => {
+            console.error('Error fetching user groups:', error);
+            this.userGroups = []; // Clear the userGroups in case of an error
+          }
+        );
+      } else {
+        console.error('User is not logged in or UID is unavailable');
+        this.userGroups = []; // Clear the userGroups if not logged in
+      }
+    } catch (error) {
+      console.error('Error fetching user groups:', error);
+    }
+  }
+  
+  
+
 
   async joinGroup(group: Team | undefined) {
     if (group && group.id) {
@@ -113,46 +116,51 @@ async fetchGroups() {
       console.error('The group or group ID is undefined. Cannot join group.');
     }
   }
-  
-  
-  
 
-  async deleteGroup(groupId: string | undefined) {
-    if (!groupId) {
-      console.error('Error: groupId is undefined. Cannot delete group.');
+
+  async deleteGroup(group: Team) {
+    const currentUser = await firstValueFrom(this.auth.getCurrentUser());
+    if (!currentUser || !currentUser.uid) {
+      console.error('User not logged in or UID is unavailable');
       return;
     }
     
-    try {
-      await this.groupService.deleteGroup(groupId);
-      console.log('Group deleted successfully');
-      this.groups = this.groups.filter(group => group.id !== groupId);
-    } catch (error) {
-      console.error('Error deleting group:', error);
+    // Check if the current user is the creator of the group before attempting to delete
+    if (group.id && group.creatorId === currentUser.uid) {
+      try {
+        await this.groupService.deleteGroup(group.id, currentUser.uid);
+        console.log('Group deleted successfully');
+        this.userGroups = this.userGroups.filter(g => g.id !== group.id);
+      } catch (error) {
+        console.error('Error deleting group:', error);
+      }
+    } else {
+      console.error('Group ID is undefined. Cannot delete group.');
     }
   }
+  
+  isUserGroupCreator(group: Team): boolean {
+    console.log(group.creatorId);
+    return group.creatorId === this.currentUser?.uid;
+  }
+  
 
   filterGroups(event: any) {
-  const searchTerm = event.detail.value.toLowerCase();
-  this.searchPerformed = true; // Update flag to indicate a search has been performed
-
-  if (!searchTerm.trim()) {
-    // Consider whether to reset to all groups or display none based on your requirements
-    this.groups = []; // Don't display any groups if no search term is entered
-  } else {
-    // Filter groups based on the search term
-    this.groups = this.allGroups.filter(group => {
-      return group.groupName.toLowerCase().includes(searchTerm) ||
-             (group.groupDescription && group.groupDescription.toLowerCase().includes(searchTerm));
-    });
+    const searchTerm = event.detail.value.toLowerCase();
+    this.searchPerformed = true; // Indicate a search has been performed
+  
+    if (!searchTerm.trim()) {
+      this.groups = []; // Option to reset the displayed groups based on your UX choice
+    } else {
+      // Filter allGroups based on the search term, not considering membership
+      this.groups = this.allGroups.filter(group => {
+        return group.groupName.toLowerCase().includes(searchTerm) ||
+               (group.groupDescription && group.groupDescription.toLowerCase().includes(searchTerm));
+      });
+    }
   }
-}
+  
 
-
-  
-  
-  
-  
   async onSubmit() {
     if (this.groupForm.valid) {
       const formValue = this.groupForm.value;
@@ -166,7 +174,8 @@ async fetchGroups() {
             groupName,
             groupDescription,
             members: [], // Initially empty, creator will be added in service
-            lastMessage: ''
+            lastMessage: '',
+            creatorId: user.uid
           }, user.uid);
   
           console.log('Group created with ID:', groupId);
@@ -179,17 +188,9 @@ async fetchGroups() {
     }
   }
 
-
-  // Inside GroupsPagePage class
-
 async goToGroupPage(group: Team) {
   // Assuming you have a route set up for 'group-detail' page
   this.router.navigate(['/group-detail', { id: group.id }]);
 }
-
-  
-  
-  
-  
 
 }

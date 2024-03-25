@@ -30,6 +30,7 @@
 </div>
 
 <!-- Conditionally display the list of groups -->
+<!-- Search Results -->
 <div class="ion-padding" *ngIf="searchPerformed">
   <h2>Search Results</h2>
   <ion-list *ngIf="groups.length > 0; else noGroupsFound">
@@ -45,18 +46,23 @@
     <ion-text>No groups found.</ion-text>
   </ng-template>
 </div>
-   <div class="ion-padding">
-    <h2>My Groups</h2>
-    <ion-list>
-      <ion-item *ngFor="let group of groups" (click)="goToGroupPage(group)">
-        <ion-label>
-          <h3>{{ group.groupName }}</h3>
-          <p>{{ group.groupDescription }}</p>
-        </ion-label>
-        <ion-button fill="outline" slot="end" (click)="joinGroup(group); $event.stopPropagation()">Join</ion-button>
-        <ion-button fill="outline" slot="end" (click)="deleteGroup(group.id); $event.stopPropagation()"> <ion-icon name="trash-outline"></ion-icon>Delete</ion-button>
-      </ion-item>
-    </ion-list>
-    
-  </div>
+
+<!-- My Groups -->
+<div class="ion-padding">
+  <h2>My Groups</h2>
+  <ion-list>
+    <ion-item *ngFor="let group of userGroups" (click)="goToGroupPage(group)">
+      <ion-label>
+        <h3>{{ group.groupName }}</h3>
+        <p>{{ group.groupDescription }}</p>
+      </ion-label>
+      <ion-button  fill="outline" slot="end" (click)="deleteGroup(group)">
+        <ion-icon name="trash-outline"></ion-icon>Delete
+      </ion-button>
+      
+      
+    </ion-item>
+  </ion-list>
+</div>
+
 </ion-content>
