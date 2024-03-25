@@ -44,4 +44,22 @@ ion-card {
       }
     }
   }
+
+  /* Assuming .group-description is the class for your description card */
+.group-description {
+  background-color: #f4f4f8; /* Light grey background */
+  border-left: 5px solid #3273dc; /* Thick blue border on the left */
+  padding: 16px; /* More padding inside the card */
+  margin: 16px 0; /* Add some margin around the card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+  
+  ion-card-title {
+    color: #3273dc; /* Style the title text with a blue color */
+  }
+
+  p {
+    color: #363636; /* Darker text for better readability */
+  }
+}
+
   

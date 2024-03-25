@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Team, Post } from 'src/app/models/model/model';
 import { GroupService } from 'src/app/services/group.service';
-import { Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { AlertController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
+import { CreatePostPage } from '../create-post/create-post.page';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-group-detail',
@@ -23,18 +24,24 @@ export class GroupDetailPage implements OnInit {
   groupId: string =''
   groups: Team[] = []
 
+  selectedFile?: File;
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private auth: AuthenticationService,
     private alertController: AlertController,
     private userProfileService: UserProfileService,
-    private groupService: GroupService
+    private groupService: GroupService,
+    private dialog: MatDialog,
+    
   ) { 
     this.postForm = this.fb.group({
       content: ['', Validators.required],
   });
+  
 }
+
 
   ngOnInit() {
     this.auth.getCurrentUser().subscribe(user => {
@@ -66,6 +73,16 @@ export class GroupDetailPage implements OnInit {
     });
   }
 
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length) {
+      this.selectedFile = input.files[0];
+    } else {
+      this.selectedFile = undefined;
+    }
+  }
+  
+
   loadGroup(groupId: string) {
     this.groupService.getGroupById(groupId).then(group => {
       this.group = group;
@@ -78,17 +95,18 @@ export class GroupDetailPage implements OnInit {
 
   async addPost() {
     if (this.postForm.valid) {
-      const user = await firstValueFrom(this.auth.getCurrentUser()); // Make sure this correctly awaits the current user
+      const user = await firstValueFrom(this.auth.getCurrentUser());
       const groupId = this.route.snapshot.paramMap.get('id');
       const postContent = this.postForm.value.content;
+
       if (user && groupId) {
-        // Note: Adjust according to whether you're using images or other additional data
-        this.userProfileService.createPost(user.uid, postContent, groupId)
+        this.userProfileService.createPost(user.uid, postContent, groupId, this.selectedFile)
           .subscribe({
             next: (postId) => {
               console.log(`Post created with ID: ${postId}`);
-              this.postForm.reset(); // Reset the form after successful post creation
-              this.loadPostsForGroup(groupId); // Refresh the list of posts
+              this.postForm.reset();
+              this.selectedFile = undefined; // Reset selected file
+              this.loadPostsForGroup(groupId);
             },
             error: (error) => {
               console.error('Error creating post:', error);
@@ -168,6 +186,11 @@ export class GroupDetailPage implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  //opens pop up box for posts
+  onCreatePostClick(){
+    this.dialog.open(CreatePostPage);
   }
 
 }

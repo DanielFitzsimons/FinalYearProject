@@ -11,21 +11,40 @@
 
 <ion-content [fullscreen]="true">
   <!-- The rest of your group detail template -->
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Add a New Post</ion-card-title>
-  </ion-card-header>
-  <ion-card-content>
-    <form [formGroup]="postForm" (ngSubmit)="addPost()">
-      <ion-item>
-        <ion-label position="floating">Your Post</ion-label>
-        <ion-textarea formControlName="content"></ion-textarea>
-      </ion-item>
-      <ion-button type="submit" expand="block" [disabled]="postForm.invalid">Post</ion-button>
-    </form>
-  </ion-card-content>
-</ion-card>
 
+  <ion-card class="group-description">
+    <ion-card-header>
+      <ion-card-title>{{ group?.groupName }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ group?.groupDescription }}</p>
+      <p>Members: {{ group?.members?.length }}</p>
+    </ion-card-content>
+  </ion-card>
+
+
+
+  <ion-card>
+    <input type="file" #fileInput style="display: none" (change)="onFileSelected($event)" />
+    <ion-card-header>
+      <ion-card-title>Add a New Post</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="postForm" (ngSubmit)="addPost()">
+        <ion-item>
+          <ion-label position="floating">Your Post</ion-label>
+          <ion-textarea formControlName="content"></ion-textarea>
+        </ion-item>
+  
+        <!-- Button that triggers the hidden file input -->
+        <ion-item>
+          <ion-button (click)="fileInput.click()">Add Image</ion-button>
+        </ion-item>
+  
+        <ion-button type="submit" expand="block" [disabled]="postForm.invalid">Post</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card> 
 <!-- Posts List -->
 <ion-card *ngFor="let post of posts">
   <ion-card-header>
@@ -45,5 +64,7 @@
     </ion-col>
   </ion-row>
 </ion-card>
+
+
 
 </ion-content>

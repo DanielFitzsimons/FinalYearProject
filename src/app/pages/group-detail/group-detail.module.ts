@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { GroupDetailPageRoutingModule } from './group-detail-routing.module';
-
+import { MatDialogModule } from '@angular/material/dialog';
 import { GroupDetailPage } from './group-detail.page';
 
 import { ReactiveFormsModule } from '@angular/forms';
@@ -16,7 +16,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     FormsModule,
     IonicModule,
     GroupDetailPageRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ],
   declarations: [GroupDetailPage]
 })

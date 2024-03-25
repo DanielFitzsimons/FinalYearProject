@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Firestore, addDoc, collection, query, getDocs, doc, updateDoc, arrayUnion, deleteDoc, where, getDoc, serverTimestamp} from '@angular/fire/firestore';
 import { Team, Post } from '../models/model/model';
-
+import { Observable, from, map } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -19,8 +19,9 @@ export class GroupService {
 
   async createGroupAndChat(group: Team, creatorUserId: string): Promise<string> {
     // Create the group
+    const groupWithCreator = { ...group, creatorId: creatorUserId };
     const groupRef = collection(this.firestore, 'groups');
-    const docRef = await addDoc(groupRef, group);
+    const docRef = await addDoc(groupRef, groupWithCreator);
     const groupId = docRef.id;
   
     // Create the corresponding chat document
@@ -53,7 +54,8 @@ export class GroupService {
         groupName: data['groupName'],
         groupDescription: data['groupDescription'],
         members: data['members'],
-        lastMessage: data['lastMessage']
+        lastMessage: data['lastMessage'],
+        creatorId: data['creatorId']
       };
       groups.push(group);
     });
@@ -77,31 +79,48 @@ async getGroupById(groupId: string): Promise<Team> {
 
 
 // Method to get groups for the current user
-async getGroupsForUser(userId: string): Promise<Team[]> {
+getGroupsForUser(userId: string): Observable<Team[]> {
   const groupsCollection = collection(this.firestore, 'groups');
-  // Query to find groups where the 'members' array contains the current user's ID
   const groupsQuery = query(groupsCollection, where('members', 'array-contains', userId));
-  const querySnapshot = await getDocs(groupsQuery);
-  const groups: Team[] = [];
-  querySnapshot.forEach((doc) => {
-    const data = doc.data() as Team; // Cast the data to Team type
-    const group: Team = {
-      id: doc.id, // Set the id property
-      groupName: data.groupName,
-      groupDescription: data.groupDescription,
-      members: data.members,
-      lastMessage: data.lastMessage
-    };
-    groups.push(group);
-  });
-  return groups;
+  
+  // Convert the promise-based query to an observable
+  return from(getDocs(groupsQuery)).pipe(
+    map(querySnapshot => {
+      const groups: Team[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as Team;
+        const group: Team = {
+          id: doc.id,
+          groupName: data.groupName,
+          groupDescription: data.groupDescription,
+          members: data.members,
+          lastMessage: data.lastMessage,
+          creatorId: data.creatorId
+        };
+        groups.push(group);
+      });
+      return groups;
+    })
+  );
 }
 
   
-  async deleteGroup(groupId: string): Promise<void> {
-    const groupRef = doc(this.firestore, 'groups', groupId);
-    await deleteDoc(groupRef);
+async deleteGroup(groupId: string, userId: string): Promise<void> {
+  const groupRef = doc(this.firestore, 'groups', groupId);
+  const groupSnapshot = await getDoc(groupRef);
+
+  if (!groupSnapshot.exists()) {
+    throw new Error('Group not found');
   }
+
+  const group = groupSnapshot.data() as Team;
+  if (group.creatorId !== userId) {
+    throw new Error('Only the creator of this group can delete it');
+  }
+
+  await deleteDoc(groupRef);
+}
+
 
   async joinGroupAndChat(groupId: string, userId: string): Promise<void> {
     // Join the group
@@ -134,10 +153,23 @@ async getGroupsForUser(userId: string): Promise<Team[]> {
     });
   }
 
-  // Method to get posts for a group
-  async getPostsByGroupId(groupId: string): Promise<Post[]> {
+  async getPostsByGroupId(groupId: string): Promise<any[]> {
+    const groupDocRef = doc(this.firestore, 'groups', groupId);
+    const groupSnapshot = await getDoc(groupDocRef);
+  
+    if (!groupSnapshot.exists()) {
+      throw new Error('Group not found');
+    }
+  
+    const groupName = groupSnapshot.data()?.['groupName']; // Assuming 'groupName' is the field containing the group name
+  
     const postsCollection = collection(this.firestore, `groups/${groupId}/posts`);
     const postsSnapshot = await getDocs(postsCollection);
-    return postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Post }));
+    const postsData = postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), groupName }));
+  
+    console.log(`Data for group ${groupId}:`, postsData); // Add this line to log the data
+  
+    return postsData;
   }
+  
 }
