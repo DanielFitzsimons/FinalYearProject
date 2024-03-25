@@ -90,3 +90,28 @@ ion-button:active {
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.pulse {
+  background: rgba(0, 123, 255, 0.5);
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s infinite;
+}
+
+

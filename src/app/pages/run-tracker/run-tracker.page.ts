@@ -1,7 +1,9 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { HttpClient } from '@angular/common/http';
 import { AuthenticationService } from 'src/app/services/authentication.service';
+import { RunData } from 'src/app/models/model/model';
+import  { UserProfileService} from 'src/app/services/user-profile.service'
 
 @Component({
   selector: 'app-run-tracker',
@@ -22,11 +24,12 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
 
   timer: any = null;
   elapsedTime: string = "00:00:00";
+  diff: number = 0;
 
   startLocation: google.maps.LatLng | null = null;
   distanceFromStart: number = 0;  // Distance in meters
 
-  constructor(private http: HttpClient, private auth: AuthenticationService) {}
+  constructor(private http: HttpClient, private auth: AuthenticationService, private changeDetectorRef: ChangeDetectorRef, private userProfileService: UserProfileService) {}
 
   ngOnInit() {}
 
@@ -44,6 +47,7 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
 
     // Load the map and set the current position after the view has been initialized
     this.loadMap();
+    
     this.setCurrentPosition();
   }
 
@@ -84,6 +88,8 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
 
         // Center the map on the user's current position
         this.map.setCenter(currentPos);
+
+        this.addPulseEffect(this.map, currentPos);
       }
     } catch (err) {
       console.error('Could not get current position', err);
@@ -205,10 +211,6 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
     );
   });
 }
-
-
-
-
   // Helper method to calculate destination based on distance
   calculateDestination(startPos: google.maps.LatLng, distance: number): google.maps.LatLng {
 
@@ -240,38 +242,40 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
   }
 
  
-// Method to update user marker position
-updateUserMarkerPosition(position: any) {
-  console.log("Updating position");
-  const newPos = new google.maps.LatLng(
-    position.coords.latitude,
-    position.coords.longitude
-  );
-
-   // Update total distance
-   if (this.previousPosition) {
-    const distanceBetweenPoints = google.maps.geometry.spherical.computeDistanceBetween(
-      this.previousPosition,
-      newPos
+  updateUserMarkerPosition(position: any) {
+    console.log("Updating position");
+    const newPos = new google.maps.LatLng(
+      position.coords.latitude,
+      position.coords.longitude
     );
-    this.totalDistance += distanceBetweenPoints;
+  
+    // Update total distance and distance from start
+    if (this.startLocation) {
+      const distanceFromStart = google.maps.geometry.spherical.computeDistanceBetween(
+        this.startLocation,
+        newPos
+      );
+      console.log(`Distance from start: ${distanceFromStart} meters`); // Log the distance from start for debugging
+      this.distanceFromStart = distanceFromStart;
+    }
+  
+    // Update user marker
+    if (this.userMarker && this.map) {
+      this.userMarker.setPosition(newPos); // This updates the marker position
+      this.map.panTo(newPos); // This keeps the marker in the center of the map view
+    } else if (this.map) {
+      // If the marker hasn't been created yet, create it at the new position
+      this.userMarker = new google.maps.Marker({
+        position: newPos,
+        map: this.map,
+        title: 'Your Location'
+      });
+    }
+  
+    this.changeDetectorRef.detectChanges();
   }
+  
 
-  this.previousPosition = newPos;
-
-  // Update user marker
-  if (this.userMarker && this.map) {
-    this.userMarker.setPosition(newPos); // This updates the marker position
-    this.map.panTo(newPos); // This keeps the marker in the center of the map view
-  } else if (this.map) {
-    // If the marker hasn't been created yet, create it at the new position
-    this.userMarker = new google.maps.Marker({
-      position: newPos,
-      map: this.map,
-      title: 'Your Location'
-    });
-  }
-}
 
 
   //method to calculate pace of user 
@@ -289,7 +293,7 @@ updateUserMarkerPosition(position: any) {
     }
   
     const pace = timeDiff / 60 / distanceKm; // Pace in minutes per kilometer
-    return pace.toFixed(2); // Return pace formatted to two decimal places
+    return pace.toFixed(2); // Convert to number with two decimal places
   }
   
 
@@ -350,6 +354,63 @@ updateUserMarkerPosition(position: any) {
       clearInterval(this.timer);
       this.timer = null;
     }
+
+
+    this.auth.currentUser$.subscribe(user => {
+      if (user && user.uid) { // assuming the user object has an 'id' property
+        const runData: RunData = {
+          userId: user.uid, // use the actual property that has the user ID
+          distance: this.totalDistance,
+          pace: this.calculatePace(), // Make sure calculatePace returns a string that can be parsed to number
+          elapsedTime: this.diff, // Replace with actual elapsed time in milliseconds
+          timestamp: new Date(),
+        };
+        
+        // Call your service to save the run data
+        this.userProfileService.saveRunData(runData)
+          .then(() => {
+            // Handle successful save, e.g. show a success message
+            console.log("Your Data has been saved!");
+          })
+          .catch(error => {
+            // Handle error, e.g. show an error message
+            console.log("There was an error saving the data!")
+          });
+      } else {
+        // Handle the case where the user is not signed in or the user data is not available
+        console.log("User not authenticated")
+      }
+    });
+}
+
+
+   addPulseEffect(map: any, position: any) {
+    const overlay = new google.maps.OverlayView();
+    
+    overlay.onAdd = function() {
+      const panes = this.getPanes();
+      if (!panes) {
+        console.error('Map panes are not available yet.');
+        return;
+      }
+  
+      const layer = document.createElement('div');
+      layer.className = 'pulse';
+      panes.overlayLayer.appendChild(layer);
+  
+      overlay.draw = () => {
+        const projection = this.getProjection();
+        const pixelPosition = projection.fromLatLngToDivPixel(position);
+  
+        if (pixelPosition) {
+          layer.style.left = `${pixelPosition.x}px`;
+          layer.style.top = `${pixelPosition.y}px`;
+        }
+      };
+    };
+  
+    overlay.setMap(map);
   }
+  
   
 }
