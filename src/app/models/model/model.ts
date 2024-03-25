@@ -35,7 +35,7 @@ export interface Post {
   id?: string; // Optional because Firebase generates the ID
   authorId: string;
   content: string;
-  timestamp: Date; // You'll use server timestamps from Firebase
+  timestamp: Date | null; // You'll use server timestamps from Firebase
   groupId: string; // The ID of the group this post belongs to
   userName: string;
   imageUrl: string;
@@ -48,4 +48,15 @@ export interface Post {
     groupDescription?: string;
     members: string[];
     lastMessage: string;
+    creatorId?: string;
   }
+
+  export interface RunData {
+    userId: string; // or any identifier for the user
+    distance: number; // distance of the run
+    pace: string; // average pace
+    elapsedTime: number; // time in milliseconds
+    timestamp: Date; // date and time when the run was logged
+    
+  }
+  
