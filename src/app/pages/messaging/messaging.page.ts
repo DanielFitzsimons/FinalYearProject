@@ -60,19 +60,25 @@ export class MessagingPage implements OnInit {
     }
   );
 
-  this.auth.currentUser$.subscribe(user => {
-    if (user) {
-      this.groupService.getGroupsForUser(user.uid)
-        .then(groups => {
-          this.groups = groups;
-        })
-        .catch(error => {
-          console.error('Error fetching groups:', error);
-        });
-    } else {
-      console.error('User not authenticated');
-    }
+  this.auth.currentUser$.subscribe({
+    next: (user) => {
+      if (user) {
+        this.groupService.getGroupsForUser(user.uid)
+          .subscribe({
+            next: (groups) => {
+              this.groups = groups;
+            },
+            error: (error) => {
+              console.error('Error fetching groups:', error);
+            }
+          });
+      } else {
+        console.error('User not authenticated');
+      }
+    },
+    error: (error) => console.error(error)
   });
+  
     // Get the list of all users for starting new conversations
     this.users$ = this.messageService.getUsers(); // Initialize the users Observable
   }

@@ -54,7 +54,7 @@ export interface Post {
   export interface RunData {
     userId: string; // or any identifier for the user
     distance: number; // distance of the run
-    pace: string; // average pace
+    pace: number; // average pace
     elapsedTime: number; // time in milliseconds
     timestamp: Date; // date and time when the run was logged
     

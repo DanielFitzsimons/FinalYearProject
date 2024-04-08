@@ -115,3 +115,23 @@ ion-button:active {
 }
 
 
+
+.run-summary-popover {
+  ion-list-header {
+    --background: var(--ion-color-primary);
+    --color: var(--ion-color-primary-contrast);
+  }
+  h2 {
+    font-size: 1.2rem;
+    color: var(--ion-color-secondary);
+  }
+  p {
+    font-size: 1rem;
+    color: var(--ion-text-color);
+  }
+  /* More styling here */
+}
+
+
+
+

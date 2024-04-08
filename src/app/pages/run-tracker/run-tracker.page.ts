@@ -4,7 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { RunData } from 'src/app/models/model/model';
 import  { UserProfileService} from 'src/app/services/user-profile.service'
-
+import { AlertController, PopoverController } from '@ionic/angular';
+import { RunSummaryPopoverComponent } from 'src/app/components/run-summary-popover/run-summary-popover.component';
 @Component({
   selector: 'app-run-tracker',
   templateUrl: './run-tracker.page.html',
@@ -29,7 +30,12 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
   startLocation: google.maps.LatLng | null = null;
   distanceFromStart: number = 0;  // Distance in meters
 
-  constructor(private http: HttpClient, private auth: AuthenticationService, private changeDetectorRef: ChangeDetectorRef, private userProfileService: UserProfileService) {}
+  constructor(private http: HttpClient, 
+    private auth: AuthenticationService,
+    private changeDetectorRef: ChangeDetectorRef, 
+    private userProfileService: UserProfileService,
+    private alertController: AlertController,
+    private popoverController: PopoverController) {}
 
   ngOnInit() {}
 
@@ -153,11 +159,15 @@ async startTracking() {
   
 }
 
-beginRun() {
+async beginRun() {
+  await this.setStartLocation(); 
   this.startLiveTracking();
   this.startTime = new Date();
   this.startTimer();
 }
+
+
+
 
 
 // Method to generate waypoints to create a rough circular route
@@ -249,15 +259,16 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
       position.coords.longitude
     );
   
-    // Update total distance and distance from start
-    if (this.startLocation) {
-      const distanceFromStart = google.maps.geometry.spherical.computeDistanceBetween(
-        this.startLocation,
-        newPos
-      );
-      console.log(`Distance from start: ${distanceFromStart} meters`); // Log the distance from start for debugging
-      this.distanceFromStart = distanceFromStart;
-    }
+     // If previousPosition exists, calculate the distance from it to newPos
+  if (this.previousPosition) {
+    const distanceMoved = google.maps.geometry.spherical.computeDistanceBetween(
+      this.previousPosition,
+      newPos
+    );
+    // Add the distance moved to the total distance
+    this.totalDistance += distanceMoved;
+    console.log(`Total Distance: ${this.totalDistance} meters`);
+  }
   
     // Update user marker
     if (this.userMarker && this.map) {
@@ -329,6 +340,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
         position.coords.latitude,
         position.coords.longitude
       );
+      this.previousPosition = this.startLocation; // Ensure this is set for distance calculations.
     }
   
    
@@ -354,34 +366,45 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
       clearInterval(this.timer);
       this.timer = null;
     }
+  
+    // Calculate elapsed time in milliseconds
+    const endTime = new Date();
+    this.diff = this.startTime ? endTime.getTime() - this.startTime.getTime() : 0;
 
-
+      // Assuming you have distance in meters, convert it to kilometers
+    const distanceKm = this.totalDistance / 1000;
+    const pace = this.calculatePace(); // Make sure this returns a string
+    const time = this.elapsedTime; // Ensure this is a string formatted as desired
+  
+    // Make sure user is signed in and has an ID
     this.auth.currentUser$.subscribe(user => {
-      if (user && user.uid) { // assuming the user object has an 'id' property
+      if (user && user.uid) {
+        // Create runData object
         const runData: RunData = {
-          userId: user.uid, // use the actual property that has the user ID
+          userId: user.uid,
           distance: this.totalDistance,
-          pace: this.calculatePace(), // Make sure calculatePace returns a string that can be parsed to number
-          elapsedTime: this.diff, // Replace with actual elapsed time in milliseconds
+          pace: parseFloat(this.calculatePace()),
+          elapsedTime: this.diff,
           timestamp: new Date(),
         };
-        
-        // Call your service to save the run data
+  
+        // Save the run data
         this.userProfileService.saveRunData(runData)
-          .then(() => {
-            // Handle successful save, e.g. show a success message
-            console.log("Your Data has been saved!");
-          })
-          .catch(error => {
-            // Handle error, e.g. show an error message
-            console.log("There was an error saving the data!")
-          });
+        .then(() => {
+          console.log("Run data saved successfully.");
+          // Present the alert with the run summary
+          this.presentRunSummaryPopover(runData);
+        })
+        .catch(error => {
+          console.error("Error saving run data:", error);
+          // Handle any errors, perhaps with another alert
+        });
       } else {
-        // Handle the case where the user is not signed in or the user data is not available
-        console.log("User not authenticated")
+        console.error("User is not authenticated or ID is missing");
       }
     });
-}
+  }
+  
 
 
    addPulseEffect(map: any, position: any) {
@@ -411,6 +434,20 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
   
     overlay.setMap(map);
   }
+  
+  async presentRunSummaryPopover(runData: RunData) {
+    const popover = await this.popoverController.create({
+      component: RunSummaryPopoverComponent,
+      componentProps: {
+        distance: `${(runData.distance / 1000).toFixed(2)}`,
+        pace: `${runData.pace.toFixed(2)}`,
+        time: this.formatTime(runData.elapsedTime)
+      },
+      cssClass: 'run-summary-popover'
+    });
+    await popover.present();
+  }
+  
   
   
 }

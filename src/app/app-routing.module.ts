@@ -55,6 +55,10 @@ const routes: Routes = [
     path: 'group-detail',
     loadChildren: () => import('./pages/group-detail/group-detail.module').then( m => m.GroupDetailPageModule)
   },
+  {
+    path: 'gym-workouts',
+    loadChildren: () => import('./pages/gym-workouts/gym-workouts.module').then( m => m.GymWorkoutsPageModule)
+  },
   
 ];
 

@@ -114,7 +114,7 @@ export class AuthenticationService {
   
       const loading = await this.loadingController.create({
         message: 'Logging out...',
-        spinner: 'crescent', // You can choose a different spinner if you want
+        spinner: 'crescent', 
       });
       await loading.present();
   

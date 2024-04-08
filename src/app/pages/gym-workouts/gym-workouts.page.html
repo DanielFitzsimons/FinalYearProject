@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Workout Tracker</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label position="floating">Exercise Name</ion-label>
+      <ion-input [(ngModel)]="currentExercise"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Number of Sets</ion-label>
+      <ion-input type="number" [(ngModel)]="numberOfSets"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Number of Reps</ion-label>
+      <ion-input type="number" [(ngModel)]="numberOfReps"></ion-input>
+    </ion-item>
+  </ion-list>
+  
+  <div class="workout-info">
+    <h2>Workout Information:</h2>
+    <p>Current Heart Rate: {{ heartRate }} bpm</p>
+    <p>Workout Duration: {{ workoutDuration | date:'HH:mm:ss' }}</p>
+  </div>
+  
+  <ion-button (click)="startWorkout()">Start Workout</ion-button>
+  <ion-button (click)="endWorkout()">End Workout</ion-button>
+</ion-content>
