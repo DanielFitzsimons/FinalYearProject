@@ -1,5 +1,10 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-title>Workout Tracker</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -23,9 +28,15 @@
   <div class="workout-info">
     <h2>Workout Information:</h2>
     <p>Current Heart Rate: {{ heartRate }} bpm</p>
-    <p>Workout Duration: {{ workoutDuration | date:'HH:mm:ss' }}</p>
+    <p>Workout Duration: {{ formatDuration(workoutDuration) }}</p>
+    <p>Last Exercise: {{ lastExercise }}</p> <!-- Display last exercise name -->
   </div>
+
+  <!-- Control Buttons for Actions -->
+  <ion-button (click)="signInWithGoogle()" color="secondary">Sign in with Google</ion-button>
+  <ion-button (click)="startWorkout()" color="success">Start Workout</ion-button>
+  <ion-button (click)="endWorkout()" color="danger">End Workout</ion-button>
   
-  <ion-button (click)="startWorkout()">Start Workout</ion-button>
-  <ion-button (click)="endWorkout()">End Workout</ion-button>
+  <!-- Additional details and controls -->
+  <ion-button (click)="saveWorkout()" color="primary">Save Workout</ion-button>
 </ion-content>
