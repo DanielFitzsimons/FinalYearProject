@@ -193,4 +193,7 @@ async goToGroupPage(group: Team) {
   this.router.navigate(['/group-detail', { id: group.id }]);
 }
 
+goToHomePage(){
+  this.router.navigate(['/home'])
+}
 }
