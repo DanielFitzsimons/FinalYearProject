@@ -20,7 +20,7 @@ import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { RunSummaryPopoverComponent } from './components/run-summary-popover/run-summary-popover.component';
 
-
+import { HttpClientModule } from '@angular/common/http';
 
 
 
@@ -31,7 +31,7 @@ import { RunSummaryPopoverComponent } from './components/run-summary-popover/run
 
 @NgModule({
   declarations: [AppComponent, RunSummaryPopoverComponent ],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, ReactiveFormsModule, MatBottomSheetModule, BrowserAnimationsModule, FirestoreModule,  provideFirebaseApp(() => initializeApp(environment.firebaseConfig)), provideAuth(() => getAuth()), provideFirestore(() => getFirestore()), provideDatabase(() => getDatabase()), provideStorage(() => getStorage())],
+  imports: [BrowserModule, HttpClientModule, IonicModule.forRoot(), AppRoutingModule, ReactiveFormsModule, MatBottomSheetModule, BrowserAnimationsModule, FirestoreModule,  provideFirebaseApp(() => initializeApp(environment.firebaseConfig)), provideAuth(() => getAuth()), provideFirestore(() => getFirestore()), provideDatabase(() => getDatabase()), provideStorage(() => getStorage())],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy, }],
   bootstrap: [AppComponent],
 })

@@ -1,0 +1,12 @@
+{
+    "/fitness": {
+      "target": "https://www.googleapis.com",
+      "secure": false,
+      "changeOrigin": true,
+      "logLevel": "debug",
+      "pathRewrite": {
+        "^/fitness": "/fitness"
+      }
+    }
+  }
+  

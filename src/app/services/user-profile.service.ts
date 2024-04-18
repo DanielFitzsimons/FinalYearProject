@@ -5,7 +5,9 @@ import { AuthenticationService } from './authentication.service';
 import { Observable, throwError, Subject } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
-import { RunData } from '../models/model/model';
+import { RunData, Activity } from '../models/model/model';
+import { DocumentData } from '@angular/fire/firestore';
+import { forkJoin } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -284,6 +286,49 @@ saveRunData(runData: RunData): Promise<void> {
     console.error("Error adding run data: ", error);
     throw new Error(error);
   });
+}
+
+// Retrieve activities (runs or gym sessions) for a specific user
+getUserActivities(userId: string, selectedSegment: "runs" | "gym"): Observable<Activity[]> {
+  console.log(`Fetching ${selectedSegment} for user ${userId}`);
+  const collectionRef = collection(this.firestore, `users/${userId}/${selectedSegment}`);
+  return this.fetchActivities(collectionRef);
+}
+
+// Fetch activities (runs or gym sessions) from Firestore
+private fetchActivities(collectionRef: any): Observable<Activity[]> {
+  console.log("Fetching activities from Firestore");
+  return collectionData(collectionRef).pipe(
+    map(documents => {
+      console.log("Documents:", documents);
+      return documents.map(doc => this.mapToActivity(doc));
+    }),
+    catchError(error => {
+      console.error('Error fetching user activities: ', error);
+      return throwError(() => error);
+    })
+  );
+}
+
+
+// Map Firestore document data to Activity object
+private mapToActivity(doc: any): Activity {
+  const distanceInMeters = doc.distance;
+  const distanceInKilometers = distanceInMeters / 1000; // Convert meters to kilometers
+  const elapsedTimeInSeconds = doc.elapsedTime;
+  const pace = doc.pace;
+  const timestamp = doc.timestamp.toDate();
+  const userId = doc.userId;
+
+  return {
+    type: 'run', // or 'gym' depending on the activity type
+    distance: distanceInKilometers,
+    elapsedTime: elapsedTimeInSeconds,
+    pace,
+    timestamp,
+    userId,
+   
+  };
 }
 
 

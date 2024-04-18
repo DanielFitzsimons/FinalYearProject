@@ -6,6 +6,8 @@ import { RunData } from 'src/app/models/model/model';
 import  { UserProfileService} from 'src/app/services/user-profile.service'
 import { AlertController, PopoverController } from '@ionic/angular';
 import { RunSummaryPopoverComponent } from 'src/app/components/run-summary-popover/run-summary-popover.component';
+import { google } from 'google-maps'
+
 @Component({
   selector: 'app-run-tracker',
   templateUrl: './run-tracker.page.html',
@@ -37,7 +39,9 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
     private alertController: AlertController,
     private popoverController: PopoverController) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.checkPermissions();
+  }
 
   ngAfterViewInit() {
     // Inside a component that needs user information
@@ -55,6 +59,28 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
     this.loadMap();
     
     this.setCurrentPosition();
+  }
+
+  async checkPermissions() {
+    const permission = await Geolocation.checkPermissions();
+    if (permission.location !== 'granted') {
+      await this.requestPermissions();
+    }
+  }
+
+  async requestPermissions() {
+    const permission = await Geolocation.requestPermissions();
+    if (permission.location === 'granted') {
+      this.setCurrentPosition();  // Optionally set the current position if needed
+    } else {
+      console.error('Location permission not granted');
+      // Optionally alert the user that location permission is needed
+      this.alertController.create({
+        header: 'Permission Required',
+        message: 'This app needs location permission to function correctly.',
+        buttons: ['OK']
+      }).then(alert => alert.present());
+    }
   }
 
   // Method to load the map
@@ -95,7 +121,7 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
         // Center the map on the user's current position
         this.map.setCenter(currentPos);
 
-        this.addPulseEffect(this.map, currentPos);
+        //this.addPulseEffect(this.map, currentPos);
       }
     } catch (err) {
       console.error('Could not get current position', err);
@@ -143,7 +169,7 @@ async startTracking() {
 
       // Center the map on the route
       const bounds = new google.maps.LatLngBounds();
-      routePolyline.getPath().forEach((latLng) => {
+      routePolyline.getPath().forEach((latLng: any) => {
         bounds.extend(latLng);
       });
       this.map.fitBounds(bounds);
@@ -211,7 +237,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
         travelMode: google.maps.TravelMode.WALKING,
         optimizeWaypoints: true, // This option will reorder waypoints to minimize route distance
       },
-      (result, status) => {
+      (result: any, status: any) => {
         if (status === google.maps.DirectionsStatus.OK) {
           resolve(result);
         } else {
@@ -237,7 +263,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
    startLiveTracking() {
     const options = {
       maximumAge: 0,
-      timeout: 5000,
+      timeout: 10000,
       enableHighAccuracy: true,
     };
    

@@ -12,14 +12,6 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'landing',
-    loadChildren: () => import('./pages/landing/landing.module').then( m => m.LandingPageModule)
-  },
-  {
-    path: 'tasks',
-    loadChildren: () => import('./tasks/tasks.module').then( m => m.TasksPageModule)
-  },
-  {
     path: 'authenticator',
     loadChildren: () => import('./pages/authenticator/authenticator.module').then( m => m.AuthenticatorPageModule)
   },
@@ -48,7 +40,7 @@ const routes: Routes = [
     loadChildren: () => import('./pages/chat-page/chat-page.module').then( m => m.ChatPagePageModule)
   },
   {
-    path: 'media-files',
+    path: 'media-files/:groupId',
     loadChildren: () => import('./pages/media-files/media-files.module').then( m => m.MediaFilesPageModule)
   },
   {
