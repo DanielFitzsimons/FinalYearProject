@@ -3,6 +3,9 @@ import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage
 import { Firestore, addDoc, collection, query, where, getDocs } from '@angular/fire/firestore';
 import { MediaFilesService } from 'src/app/services/media-files.service';
 import { AuthenticationService } from 'src/app/services/authentication.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
+import { Team } from 'src/app/models/model/model';
 @Component({
   selector: 'app-media-files',
   templateUrl: './media-files.page.html',
@@ -18,60 +21,51 @@ export class MediaFilesPage implements OnInit {
   currentUserId?: string;
 
 
-  constructor(private storage: Storage, private firestore: Firestore, private mediaService: MediaFilesService, private auth: AuthenticationService) { }
+  constructor(private storage: Storage, private firestore: Firestore, private mediaService: MediaFilesService, private auth: AuthenticationService,
+    private route: ActivatedRoute, private router: Router, private alertController: AlertController
+  ) { }
 
   ngOnInit() {
-  
-      this.auth.currentUser$.subscribe( // Listen for changes in the current user's authentication state
-      user => {
-        if (user) {
-          // User is authenticated
-          this.currentUserId = user.uid; // Store the current user's ID
-          console.log(this.currentUserId)
-          this.getUserGroups();
-        } else {
-          // User is not authenticated
-          console.error('User not authenticated');
-        
-        }
-      },
-      error => {
-        console.error('Error in authentication:', error);
-      }
-    );
+    this.auth.currentUser$.subscribe(user => {
+      if (user) {
+        this.currentUserId = user.uid;
+        console.log("Authenticated User ID:", this.currentUserId);
 
-    this.mediaService.getFilesByGroupId(this.groupId).then(files => {
-      this.files = files;
-      this.groupedFiles = this.groupFilesByType(files);
-    }).catch(error => {
-      console.error('Error loading files:', error);
-    });
-  }
-  
-  getUserGroups() {
-    const groupsQuery = query(collection(this.firestore, 'groups'), where('members', 'array-contains', this.currentUserId));
-    getDocs(groupsQuery).then(querySnapshot => {
-      if (!querySnapshot.empty) {
-        // Assume you want the first group, or let the user select a group
-        this.groupId = querySnapshot.docs[0].id;
-        console.log('Current group set to:', this.groupId);
-  
-        // Now you can load files for this group
-        this.mediaService.getFilesByGroupId(this.groupId).then(files => {
-          this.files = files;
-          this.groupedFiles = this.groupFilesByType(files);
-        }).catch(error => {
-          console.error('Error loading files:', error);
+        this.route.paramMap.subscribe(params => {
+          const newGroupId = params.get('groupId');
+          console.log("Received new groupId from route:", newGroupId);
+
+          if (newGroupId && newGroupId !== this.groupId) {
+            this.groupId = newGroupId;
+            console.log("Updated groupId to:", this.groupId);
+            this.loadFilesForGroup();
+          } else if (!newGroupId) {
+            console.error('No groupId provided in the route parameters.');
+            this.presentAlert('Error', 'No group ID provided. Please navigate back and select a group.');
+          }
         });
-  
+
       } else {
-        console.error('User is not part of any groups');
+        console.error('User not authenticated');
+        this.router.navigate(['/login']);
       }
-    }).catch(error => {
-      console.error('Error getting groups:', error);
     });
-  }
+}
   
+  loadFilesForGroup() {
+    console.log("Attempting to load files for groupId:", this.groupId);
+    this.mediaService.getFilesByGroupId(this.groupId).then(files => {
+        console.log("Files loaded for groupId:", this.groupId, files);
+        this.files = files;
+        this.groupedFiles = this.groupFilesByType(files);
+        console.log("Grouped files:", this.groupedFiles);
+    }).catch(error => {
+        console.error('Error loading files:', error);
+        this.presentAlert('Error', 'Failed to load files for the selected group.');
+    });
+}
+
+
 
  // Function to determine file type based on the file extension
  determineFileType(fileName: string): string {
@@ -93,45 +87,37 @@ export class MediaFilesPage implements OnInit {
   return extensionMap[extension] || 'other'; // Default to 'other' if extension is not found
 }
 
-async uploadFile(event:any) {
+uploadFile(event: any) {
   const input = event.target as HTMLInputElement;
   const file = input.files ? input.files[0] : null;
+  console.log("Preparing to upload file for groupId:", this.groupId);
 
   if (!this.groupId) {
-    console.error('GroupId is not set. Cannot upload file.');
-    return;
+      console.error('GroupId is not set. Cannot upload file.');
+      return;
   }
 
   if (file) {
-    const fileType = this.determineFileType(file.name);
-    const filePath = `${fileType}/${new Date().getTime()}_${file.name}`;
-    const fileRef = ref(this.storage, filePath);
-    console.log('Starting upload for:', file.name);
-    const groupFilesRef = collection(this.firestore, `groups/${this.groupId}/files`);
+      const fileType = this.determineFileType(file.name);
+      const filePath = `${fileType}/${new Date().getTime()}_${file.name}`;
+      const fileRef = ref(this.storage, filePath);
+      const groupFilesRef = collection(this.firestore, `groups/${this.groupId}/files`);
 
-    try {
-      const uploadResult = await uploadBytes(fileRef, file);
-      console.log('Upload success:', uploadResult);
-      
-      const downloadURL = await getDownloadURL(uploadResult.ref);
-      console.log('File available at', downloadURL);
-      
-      // Store file metadata including the file type in Firestore
-      const fileMetadata = {
-        url: downloadURL,
-        name: file.name,
-        createdAt: new Date(),
-        type: fileType
-      };
-     
-      await addDoc(groupFilesRef, fileMetadata);
-      console.log('Metadata stored for:', file.name);
-
-    } catch (error) {
-      console.error("Upload failed", error);
-    }
+      console.log('Starting file upload:', file.name, 'to groupId:', this.groupId);
+      uploadBytes(fileRef, file).then(uploadResult => {
+          getDownloadURL(uploadResult.ref).then(downloadURL => {
+              const fileMetadata = {
+                  url: downloadURL,
+                  name: file.name,
+                  createdAt: new Date(),
+                  type: fileType
+              };
+              addDoc(groupFilesRef, fileMetadata);
+              console.log('File uploaded and metadata stored:', fileMetadata);
+          }).catch(error => console.error("Error getting download URL:", error));
+      }).catch(error => console.error("Upload failed:", error));
   } else {
-    console.log('No file selected');
+      console.log('No file selected for upload.');
   }
 }
 
@@ -147,14 +133,28 @@ private groupFilesByType(files: any[]): { [key: string]: any[] } {
   return grouped;
 }
 
-// In your component class
+
 
 public getObjectKeys(obj: object): string[] {
   return Object.keys(obj);
 }
 
   
-  
+async presentAlert(header: string, message: string) {
+  const alert = await this.alertController.create({
+    header: header,
+    message: message,
+    buttons: ['OK']
+  });
+
+  await alert.present();
+}
+
+async navigateToGroupDetail(groupId: string) {
+  // Use matrix URL notation for optional route parameters
+  this.router.navigate(['/group-detail', { id: groupId }]);
+}
+
 
 }
 

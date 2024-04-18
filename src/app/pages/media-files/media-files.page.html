@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button routerLink="/home">
+      <ion-button  (click)="navigateToGroupDetail(groupId)">
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -28,9 +28,10 @@
   <div class="folder-container">
     <ng-container *ngFor="let type of getObjectKeys(groupedFiles)">
       <div class="folder-heading">{{ type | titlecase }}</div>
-      <div *ngFor="let file of groupedFiles[type]" class="file-item" [ngClass]="{'video-item': file.type === 'video', 'non-video-item': file.type !== 'video'}">
+      <div *ngFor="let file of groupedFiles[type]" class="file-item">
         <ng-container *ngIf="file.type === 'video'; else nonVideoFiles">
-          <video controls [src]="file.url"></video>
+          <!-- Display a video player for video files -->
+          <video controls [src]="file.url" width="320" height="240"></video>
         </ng-container>
         <ng-template #nonVideoFiles>
           <!-- Display a link for non-video files -->
@@ -39,9 +40,10 @@
       </div>
     </ng-container>
   </div>
-  
-  
-  
-  
+
+    <!-- Display a message if no files are present -->
+    <div *ngIf="!(groupedFiles && getObjectKeys(groupedFiles).length > 0)">
+      <p>No files to display.</p>
+    </div>
   
 </ion-content>
