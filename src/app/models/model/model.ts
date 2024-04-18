@@ -1,5 +1,5 @@
 import { Timestamp } from "@angular/fire/firestore";
-import { FieldValue } from "@angular/fire/firestore";
+
 // models.ts
 
 export interface User {
@@ -9,6 +9,19 @@ export interface User {
     email: string;
   }
   
+  // activity.model.ts
+export interface Activity {
+  id?: string;
+  userId: string;
+  type: 'run' | 'gym';
+  //date: Date;
+  distance?: number; // For runs
+  elapsedTime?: number; // For runs and gym sessions
+  caloriesBurned?: number; // For gym sessions
+  pace?: number;
+  timestamp: any;
+}
+
  
   
   export interface Conversation {
@@ -23,7 +36,7 @@ export interface User {
   export interface Message {
     id?: string;
     conversationId?: string; // Make conversationId optional
-    groupId?: string; // Optionally add groupId for group messages
+    groupId?: string; 
     sender: string;
     senderName: string;
     content: string;
@@ -58,5 +71,21 @@ export interface Post {
     elapsedTime: number; // time in milliseconds
     timestamp: Date; // date and time when the run was logged
     
+  }
+
+  export interface GoogleFitHeartRatePoint {
+    value: Array<{ intVal: number }>;
+  }
+  
+  export interface GoogleFitDataSet {
+    point: GoogleFitHeartRatePoint[];
+  }
+  
+  export interface GoogleFitBucket {
+    dataset: GoogleFitDataSet[];
+  }
+  
+  export interface GoogleFitHeartRateResponse {
+    bucket: GoogleFitBucket[];
   }
   
