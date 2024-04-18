@@ -4,6 +4,8 @@
       <ion-button routerLink="/groups-page">
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
+      <ion-button routerLink="/media-files/{{ groupId }}" expand="block">View Files</ion-button>
+
     </ion-buttons>
     <ion-title>{{ group?.groupName }}</ion-title>
   </ion-toolbar>
@@ -38,7 +40,8 @@
   
         <!-- Button that triggers the hidden file input -->
         <ion-item>
-          <ion-button (click)="fileInput.click()">Add Image</ion-button>
+          <ion-button (click)="fileInput.click()">
+            <ion-icon name="images-outline"></ion-icon></ion-button>
         </ion-item>
   
         <ion-button type="submit" expand="block" [disabled]="postForm.invalid">Post</ion-button>

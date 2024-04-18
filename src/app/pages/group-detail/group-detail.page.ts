@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Team, Post } from 'src/app/models/model/model';
 import { GroupService } from 'src/app/services/group.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -34,6 +34,7 @@ export class GroupDetailPage implements OnInit {
     private userProfileService: UserProfileService,
     private groupService: GroupService,
     private dialog: MatDialog,
+    private router: Router
     
   ) { 
     this.postForm = this.fb.group({
@@ -43,35 +44,29 @@ export class GroupDetailPage implements OnInit {
 }
 
 
-  ngOnInit() {
-    this.auth.getCurrentUser().subscribe(user => {
-      if (user) {
-        this.userId = user.uid;
-        this.userProfileService.getGroupIdForUser(this.userId).subscribe(
-          (groupId) => {
-            if (groupId) {
-              this.groupId = groupId;
-              this.loadPostsForGroup(this.groupId);
-            } else {
-              console.error('No group found for this user.');
-            }
-          },
-          (error) => console.error('Error fetching group for user:', error)
-        );
-      } else {
-        console.error('User is not logged in.');
-      }
-    });
-
-    this.route.paramMap.subscribe(params => {
-      const groupId = params.get('id');
-      if (groupId) {
-        this.groupId = groupId;
-        this.loadGroup(groupId); // Fetch and load group details
-        this.loadPostsForGroup(groupId); // Load posts for the group
-      }
-    });
-  }
+ngOnInit() {
+  this.auth.getCurrentUser().subscribe(user => {
+    if (user) {
+      this.userId = user.uid;
+      console.log("Authenticated User ID:", this.userId);
+      
+      this.route.paramMap.subscribe(params => {
+        const groupId = params.get('id');
+        console.log("Route parameter groupId:", groupId);
+        
+        if (groupId) {
+          this.groupId = groupId;
+          console.log("Set groupId from route:", this.groupId);
+          this.loadGroup(this.groupId); 
+          this.loadPostsForGroup(this.groupId);
+        }
+      });
+    } else {
+      console.error('User is not logged in.');
+      this.router.navigate(['/login']);
+    }
+  });
+}
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -84,13 +79,15 @@ export class GroupDetailPage implements OnInit {
   
 
   loadGroup(groupId: string) {
+    console.log("Loading group details for groupId:", groupId);
     this.groupService.getGroupById(groupId).then(group => {
+      console.log("Group details loaded:", group);
       this.group = group;
     }).catch(error => {
       console.error('Error fetching group details:', error);
       this.presentAlert('Error', 'Failed to load group details.');
     });
-  }
+}
   
 
   async addPost() {
@@ -121,18 +118,18 @@ export class GroupDetailPage implements OnInit {
   }
 
   loadPostsForGroup(groupId: string) {
+    console.log("Loading posts for groupId:", groupId);
     this.userProfileService.getPostsByGroupId(groupId).subscribe(
       (retrievedPosts) => {
-        // Convert Firestore Timestamps to JavaScript Date objects
+        console.log('Posts loaded for groupId:', groupId, retrievedPosts);
         this.posts = retrievedPosts.map(post => ({
           ...post,
-          timestamp: post.timestamp.toDate() // Assuming 'timestamp' is the field with the Firestore Timestamp
+          timestamp: post.timestamp.toDate()
         }));
-        console.log('Posts for group:', this.posts);
       },
       (error) => console.error('Error loading posts for group:', error)
     );
-  }
+}
 
   editPost(post: any) {
     const updatedContent = prompt('Enter updated content:', post.content);
@@ -176,6 +173,9 @@ export class GroupDetailPage implements OnInit {
     });
   }
   
+  navigateToMediaFilesPage(groupId: any) {
+    this.router.navigate(['/media-files', groupId]);
+  }
   
   
   // Utility function to present an alert - add this to your class
