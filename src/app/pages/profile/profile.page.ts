@@ -7,6 +7,7 @@ import { map } from 'rxjs/operators';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { LoadingController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
+import { Activity } from 'src/app/models/model/model';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -26,6 +27,8 @@ export class ProfilePage implements OnInit {
 
   showForm: boolean = false;
 
+  selectedSegment: 'runs' | 'gym' = 'runs';
+  activities: Activity[] = [];
 
 
   // Form group for user profile data with default values and validators
@@ -56,6 +59,7 @@ export class ProfilePage implements OnInit {
 
           // Now that you have the user, you can load the profile
           this.loadUserProfile(this.uid);
+          this.fetchActivities();
         } else {
           // User is not authenticated, handle accordingly
           console.error('User not authenticated');
@@ -74,8 +78,15 @@ export class ProfilePage implements OnInit {
         userProfiles.filter(profile => profile['email'] === this.user?.email)
       )
     );
+
+
   }
 
+  fetchActivities() {
+    this.userProfileService.getUserActivities(this.uid, this.selectedSegment).subscribe(activities => {
+      this.activities = activities;
+    });
+  }
   // Function to load user profile data
 loadUserProfile(uid: string) {
   this.userProfileService.getUserProfile(uid).subscribe(
