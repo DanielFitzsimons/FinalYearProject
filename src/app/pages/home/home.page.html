@@ -1,40 +1,22 @@
-<ion-menu contentId="main-content">
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Menu Content</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content class="ion-padding">
-    <ion-list>
-      <ion-button id="profile" routerLink="/profile" expand="block">
-        View Profile
-      </ion-button>
-      <ion-button id="logout" expand="block" (click)="logout()">
-        Logout
-      </ion-button>
-      <ion-button routerLink="/messaging" expand="block">Messages</ion-button>
-      <ion-button routerLink="/media-files" expand="block">Files</ion-button>
-    </ion-list>
-  </ion-content>
-</ion-menu>
-
-
 <ion-router-outlet id="main-content"></ion-router-outlet>
 
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+    <ion-buttons slot="end">
+      <ion-button id="logout" (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
+    
     <ion-title>Home</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <app-feed></app-feed>
-  <ion-button (click)="onCreatePostClick()" id="post-button">
+  <!-- <ion-button (click)="onCreatePostClick()" id="post-button">
     <ion-icon name="chevron-forward-circle-outline"></ion-icon>
-  </ion-button>
+  </ion-button> -->
   
 </ion-content>
 
