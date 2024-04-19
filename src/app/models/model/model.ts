@@ -73,8 +73,15 @@ export interface Post {
     
   }
 
+  export interface GoogleFitHeartRateValue {
+    intVal?: number;  // Integer value, optional because not all points will have it
+    fpVal?: number;   // Floating-point value, optional because not all points will have it
+  }
+  
   export interface GoogleFitHeartRatePoint {
-    value: Array<{ intVal: number }>;
+    startTimeMillis?: number; // Timestamp when the data point starts, optional
+    endTimeMillis?: number;   // Timestamp when the data point ends, optional
+    value: GoogleFitHeartRateValue[];
   }
   
   export interface GoogleFitDataSet {
@@ -88,4 +95,5 @@ export interface Post {
   export interface GoogleFitHeartRateResponse {
     bucket: GoogleFitBucket[];
   }
+  
   

@@ -10,7 +10,7 @@ export class GymWorkoutsPage implements OnInit {
   currentExercise: string = '';
   numberOfSets: number = 0;
   numberOfReps: number = 0;
-  heartRate: number = 0; // This will be updated with real data from the smartwatch
+  heartRate: any = 0; // This will be updated with real data from the smartwatch
   workoutDuration: number = 0; // Duration in seconds
   workoutTimer: any; // This will hold our interval for the workout timer
   currentHeartRateSimulator: any; // Holds the interval ID for
@@ -45,15 +45,13 @@ export class GymWorkoutsPage implements OnInit {
 }
 
 async createSession() {
-  const startTime = new Date();
+  const startTime = this.getIrishTime(new Date());
   const endTime = new Date(startTime.getTime() + 7200000); // 2 hours later
 
-  // Convert start and end times to GMT
   const startTimeGMT = new Date(startTime.getTime() - startTime.getTimezoneOffset() * 60000);
   const endTimeGMT = new Date(endTime.getTime() - endTime.getTimezoneOffset() * 60000);
 
-  const sessionId = startTime.toISOString(); // Keep using ISO string for session ID
-
+  const sessionId = startTime.toISOString();
   const requestBody = {
     id: sessionId,
     name: "Workout Session",
@@ -70,12 +68,31 @@ async createSession() {
 
   try {
     const response = await this.bluetoothService.startGoogleFitSession(sessionId, requestBody);
-    console.log("Session started with ID:", sessionId);
-    return response;
+    console.log("Session started with ID:", sessionId, "Response:", response);
   } catch (error) {
     console.error("Error starting session:", error);
   }
 }
+
+getIrishTime(date: Date): Date {
+  const STANDARD_TIME_OFFSET = 0; // GMT
+  const DAYLIGHT_SAVING_OFFSET = 60; // GMT+1 for daylight saving
+
+  const daylightSavingStart = new Date(Date.UTC(date.getUTCFullYear(), 2, 31)); // March
+  const daylightSavingEnd = new Date(Date.UTC(date.getUTCFullYear(), 9, 31)); // October
+  daylightSavingStart.setUTCDate(daylightSavingStart.getUTCDate() - daylightSavingStart.getUTCDay());
+  daylightSavingEnd.setUTCDate(daylightSavingEnd.getUTCDate() - daylightSavingEnd.getUTCDay());
+
+  let localTimeOffset = STANDARD_TIME_OFFSET;
+  if (date >= daylightSavingStart && date < daylightSavingEnd) {
+      localTimeOffset = DAYLIGHT_SAVING_OFFSET;
+  }
+
+  return new Date(date.getTime() + localTimeOffset * 60000);
+}
+
+
+
 
 
 resetWorkout() {
@@ -130,36 +147,50 @@ pad(num: number): string {
 
 // Add a new method to fetch heart rate data for a given time period
 async fetchHeartRateDataForWorkout() {
-  const now = new Date(); // Current date and time
-  const offset = now.getTimezoneOffset(); // Get the current time zone offset in minutes
-  const startTime = new Date(now.getTime() - this.workoutDuration * 1000 - (offset * 60 * 1000)); // Adjust start time to GMT
-  const endTime = new Date(now.getTime() - (offset * 60 * 1000)); // Adjust end time to GMT
-  
-  try {
-    const heartRateData = await this.bluetoothService.getHeartRateData(startTime, endTime);
-    if (heartRateData && heartRateData.bucket && heartRateData.bucket.length > 0) {
-      // Assuming the Google Fit response has a bucket property
-      // You will need to adjust the access here based on the actual structure of the response
-      const lastBucket = heartRateData.bucket[heartRateData.bucket.length - 1];
-      const lastDataSet = lastBucket.dataset[0]; // Assuming there is at least one dataset
-      const lastDataPoint = lastDataSet.point[0]; // Assuming there is at least one data point
-      
-      this.heartRate = lastDataPoint.value[0].intVal; // Update the heart rate
+  const now = new Date();
+  const startTime = '2024-04-17T18:00:00Z'; 
+    const endTime = new Date().toISOString(); 
+
+    /* try {
+      const heartRateDataResponse = await this.bluetoothService.getHeartRateData(startTime, endTime);
+      if (heartRateDataResponse) {
+        const heartRateValues = heartRateDataResponse.bucket.flatMap(bucket =>
+          bucket.dataset.flatMap(dataset =>
+            dataset.point.flatMap(point =>
+              point.value.map(value => value.fpVal || value.intVal)
+            )
+          )
+        );
+        const latestHeartRateValue = heartRateValues.length > 0 ? heartRateValues[heartRateValues.length - 1] : null;
+        if (latestHeartRateValue !== null) {
+          this.heartRate = latestHeartRateValue;
+          console.log(`Updated Heart Rate: ${this.heartRate}`);
+        } else {
+          console.log('No heart rate data available for the specified time range.');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching heart rate data:', error);
+    }*/
+    const heartRate = await this.bluetoothService.getHeartRateData(startTime, endTime);
+    if (heartRate !== null) {
+      this.heartRate = heartRate; // Update your component's heart rate property
       console.log(`Updated Heart Rate: ${this.heartRate}`);
+    } else {
+      console.log('No heart rate data available.');
     }
-  } catch (error) {
-    console.error('Error fetching heart rate data:', error);
-  }
 }
+
 
 // Modify the existing startHeartRateFetch method
 startHeartRateFetch() {
   // Fetch initial data once before starting the interval
+  this.retrieveFitData();
   this.fetchHeartRateDataForWorkout();
 
   this.currentHeartRateSimulator = setInterval(() => {
     this.fetchHeartRateDataForWorkout();
-  }, 60000); // Update every minute
+  }, 30000); // Update every minute
 }
 
 stopHeartRateFetch() {
@@ -169,12 +200,10 @@ stopHeartRateFetch() {
 }
 
 
-
-
 async retrieveFitData() {
   // Call the method from the Bluetooth service to retrieve Google Fit data
   try {
-    const startTime = '2024-04-12T01:17:00Z'; 
+    const startTime = '2024-04-18T00:00:00Z'; 
     const endTime = new Date().toISOString(); 
     
     const data = await this.bluetoothService.listDataSources();

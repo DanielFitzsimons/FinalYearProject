@@ -24,9 +24,6 @@ export class BluetoothService {
  
   }
   
- 
-
- 
 
   async signInWithGoogle(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -101,17 +98,7 @@ export class BluetoothService {
     return response;
   }
 
-
-  async getHeartRateData1(startTime: string, endTime: string): Promise<any> {
-    const url = `${this.proxyUrl}/heart-rate?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`;
-    const headers = new HttpHeaders({
-      'Authorization': 'Bearer ' + this.googleUser.getAuthResponse().access_token,
-      'Content-Type': 'application/json'
-    });
-    return this.http.get(url, { headers }).toPromise();
-}
-
-async getHeartRateData(startTime: any, endTime: any): Promise<GoogleFitHeartRateResponse | null> {
+async getHeartRateData(startTime: any, endTime: any): Promise<number | null> {
   try {
       if (!this.googleUser) {
           throw new Error('User not signed in');
@@ -126,7 +113,7 @@ async getHeartRateData(startTime: any, endTime: any): Promise<GoogleFitHeartRate
       const requestBody = {
           aggregateBy: [{
               dataTypeName: "com.google.heart_rate.bpm",
-              dataSourceId: "derived:com.google.heart_rate.bpm:com.google.android.gms:merge_heart_rate_bpm"
+              dataSourceId: "derived:com.google.heart_rate.bpm:com.google.android.fit:samsung:SM-R910:e962275f:top_level"
           }],
           bucketByTime: { durationMillis: 86400000 },
           startTimeMillis: new Date(startTime).getTime(),
@@ -140,31 +127,43 @@ async getHeartRateData(startTime: any, endTime: any): Promise<GoogleFitHeartRate
       });
 
       if (!response.ok) {
-          throw new Error(`Failed to retrieve data: ${response.status} ${response.statusText}`);
+          console.error('Non-OK HTTP response', response.status, await response.text());
+          return null;
       }
 
-      const data: GoogleFitHeartRateResponse = await response.json();
+      const data = await response.json();
+      console.log("Full Google Fit heart rate data response:", data); // Detailed logging
 
-      // Now when we access properties on data, TypeScript knows their structure
-      const heartRateDataPoints = data.bucket?.[0]?.dataset?.[0]?.point ?? [];
-      if (heartRateDataPoints.length > 0) {
-          const heartRateValues = heartRateDataPoints.map(point => point.value[0].intVal);
-          console.log("Heart rate values:", heartRateValues);
-      } else {
-          console.log("No heart rate data points available.");
-      }
+      // Check for heart rate data points and log them
+      
+    // Extract heart rate values along with their timestamps
+    const heartRateValues = data.bucket.flatMap((bucket: GoogleFitBucket) =>
+      bucket.dataset.flatMap((dataset: GoogleFitDataSet) =>
+        dataset.point.flatMap((point: GoogleFitHeartRatePoint) => {
+          // Ensure you have a timestamp field here, like startTimeMillis or endTimeMillis
+          const timestamp = point.startTimeMillis; // Replace with actual timestamp field
+          return point.value.map((value: { intVal?: number, fpVal?: number }) => ({
+            value: value.fpVal || value.intVal,
+            timestamp: timestamp
+          }));
+        })
+      )
+    );
 
-      console.log("Full Google Fit heart rate data response:", data);
+    // Sort the values by timestamp in descending order
+    const sortedHeartRates = heartRateValues.sort((a: any, b: any) => b.timestamp - a.timestamp);
 
-      return data;
+    // Get the most recent heart rate value
+    const mostRecentHeartRate = sortedHeartRates.length > 0 ? sortedHeartRates[0].value : null;
+    console.log(`Most recent heart rate: ${mostRecentHeartRate}`);
+  
+    return mostRecentHeartRate; // Return the most recent heart rate value or null
+    
   } catch (error) {
       console.error('Error fetching heart rate data:', error);
-      return null; // Return null or handle error as appropriate for your application
+      return null; 
   }
 }
-
-
-
 
   async getGoogleFitData(startTime: string, endTime: string): Promise<any> {
     try {
@@ -191,6 +190,24 @@ async getHeartRateData(startTime: any, endTime: any): Promise<GoogleFitHeartRate
     }
   }
   
+  async listSubscriptions() {
+    // This will need an OAuth2 token with the right scopes
+    const accessToken = this.googleUser.getAuthResponse().access_token;
+    const response = await fetch('https://www.googleapis.com/fitness/v1/users/me/subscriptions', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + accessToken
+      }
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to list subscriptions');
+    }
+  
+    const data = await response.json();
+    console.log('Active subscriptions:', data);
+    // This logs active subscriptions. Ensure 'com.google.heart_rate.bpm' is listed.
+  }
   
   
   
