@@ -1,0 +1,15 @@
+<!-- date-time-picker.component.html -->
+<!-- DatePickerPage template -->
+<ion-content>
+  <ion-item>
+    <ion-label>Start Time</ion-label>
+    <ion-datetime [(ngModel)]="startTime"></ion-datetime>
+  </ion-item>
+  <ion-item>
+    <ion-label>End Time</ion-label>
+    <ion-datetime [(ngModel)]="endTime"></ion-datetime>
+  </ion-item>
+  <ion-button (click)="confirmSelection()">Confirm</ion-button>
+</ion-content>
+
+

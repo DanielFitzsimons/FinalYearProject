@@ -170,7 +170,7 @@ export class FeedComponent implements OnInit {
   deletePost(post: any) {
     this.auth.getCurrentUser().subscribe(currentUser => {
       if (currentUser) {
-        const currentUserId: string = currentUser.uid; // Extract UID from the User object
+        const currentUserId: string = currentUser.uid; 
   
         const confirmDelete = confirm('Are you sure you want to delete this post?');
   

@@ -51,6 +51,10 @@ const routes: Routes = [
     path: 'gym-workouts',
     loadChildren: () => import('./pages/gym-workouts/gym-workouts.module').then( m => m.GymWorkoutsPageModule)
   },
+  {
+    path: 'date-and-time-picker',
+    loadChildren: () => import('./components/date-and-time-picker/date-and-time-picker.module').then( m => m.DateAndTimePickerPageModule)
+  },
   
 ];
 

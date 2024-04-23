@@ -3,21 +3,25 @@
   bottom: 4em; /* Adjust this so it doesn't overlap the tabs */
   right: 2em;
 }
-
-
-
 app-tabs {
   position: fixed;
   bottom: 0;
   width: 100%;
-  z-index: 100; /* Ensure this is higher than content but not higher than necessary */
+  z-index: 50; /* Ensure this is higher than content but not higher than necessary */
   height: 56px; /* Adjust to the height of your tab bar */
 }
-
 ion-content {
   padding-bottom: 50px; /* Match this to the height of your tab bar */
   overflow-y: auto; /* ensures that content scrolls within the container */
   --offset-bottom: 56px; 
+
+  --background: none;
+  background-image: url('../../../images/outdoorBackground.jpg');
+  background-size: cover; /* Cover the entire viewport */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
 }
+
+
 
 
