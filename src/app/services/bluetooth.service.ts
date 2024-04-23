@@ -1,10 +1,46 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Platform } from '@ionic/angular';
 import { HttpHeaders } from '@angular/common/http';
-import { GoogleFitBucket, GoogleFitDataSet, GoogleFitHeartRatePoint, GoogleFitHeartRateResponse } from '../models/model/model';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { Firestore, collection, addDoc } from '@angular/fire/firestore';
+import { GoogleFitBucket, GoogleFitDataSet, GoogleFitHeartRatePoint, GoogleFitHeartRateResponse, GoogleFitSession, ListSessionsResponse, WorkoutDetails } from '../models/model/model';
+
 declare const gapi: any; // Declare gapi namespace
 
+interface GoogleFitDataSetsResponse {
+  dataset: GoogleFitDataSet[];
+  bucket: GoogleFitDataSetsResponse[];
+}
+
+interface HeartRateDataPointValue {
+  intVal?: number;
+  fpVal?: number;
+  // Add other possible fields from the data point value
+}
+
+interface HeartRateDataPoint {
+  startTimeNanos: string;
+  endTimeNanos: string;
+  value: HeartRateDataPointValue[];
+  // Add other fields from the data point if needed
+}
+
+// Define the structure for the expected API response
+interface DataSet {
+  point: HeartRateDataPoint[];
+}
+
+// Define the structure for a bucket which includes the datasets
+interface DataSetBucket {
+  dataset: DataSet[];
+}
+
+// Define the structure for the expected API response
+interface AggregateResponse {
+  bucket: DataSetBucket[];
+}
 
 
 @Injectable({
@@ -16,10 +52,13 @@ export class BluetoothService {
  
   private proxyUrl = 'http://localhost:3000/google-fit-api';
 
+   private sessions: GoogleFitSession[] = []
+
   googleUser?: any
 
   constructor(private http: HttpClient,
-    private platform: Platform
+    private platform: Platform,
+    private firestore: Firestore
   ) {
  
   }
@@ -44,7 +83,7 @@ export class BluetoothService {
           apiKey: 'AIzaSyAvaRfhLNA6XJMGvKMCl5YOk3ueQzsEyjY',
           clientId: clientId,
           discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/fitness/v1/rest"],
-          scope: 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.activity.write https://www.googleapis.com/auth/fitness.heart_rate.read',
+          scope: 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.activity.write https://www.googleapis.com/auth/fitness.heart_rate.read https://www.googleapis.com/auth/fitness.heart_rate.write https://www.googleapis.com/auth/fitness.body.read',
           plugin_name: 'Social Fitness'
         }).then(() => {
           const auth2 = gapi.auth2.getAuthInstance();
@@ -113,7 +152,7 @@ async getHeartRateData(startTime: any, endTime: any): Promise<number | null> {
       const requestBody = {
           aggregateBy: [{
               dataTypeName: "com.google.heart_rate.bpm",
-              dataSourceId: "derived:com.google.heart_rate.bpm:com.google.android.fit:samsung:SM-R910:e962275f:top_level"
+              dataSourceId: "derived:com.google.heart_rate.bpm:com.google.android.gms:merge_heart_rate_bpm"
           }],
           bucketByTime: { durationMillis: 86400000 },
           startTimeMillis: new Date(startTime).getTime(),
@@ -134,7 +173,7 @@ async getHeartRateData(startTime: any, endTime: any): Promise<number | null> {
       const data = await response.json();
       console.log("Full Google Fit heart rate data response:", data); // Detailed logging
 
-      // Check for heart rate data points and log them
+      
       
     // Extract heart rate values along with their timestamps
     const heartRateValues = data.bucket.flatMap((bucket: GoogleFitBucket) =>
@@ -190,28 +229,6 @@ async getHeartRateData(startTime: any, endTime: any): Promise<number | null> {
     }
   }
   
-  async listSubscriptions() {
-    // This will need an OAuth2 token with the right scopes
-    const accessToken = this.googleUser.getAuthResponse().access_token;
-    const response = await fetch('https://www.googleapis.com/fitness/v1/users/me/subscriptions', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + accessToken
-      }
-    });
-  
-    if (!response.ok) {
-      throw new Error('Failed to list subscriptions');
-    }
-  
-    const data = await response.json();
-    console.log('Active subscriptions:', data);
-    // This logs active subscriptions. Ensure 'com.google.heart_rate.bpm' is listed.
-  }
-  
-  
-  
-
 async listDataSources(): Promise<any> {
   try {
     const response = await gapi.client.fitness.users.dataSources.list({
@@ -226,5 +243,185 @@ async listDataSources(): Promise<any> {
   }
 }
 
+async listActivities(startTime: Date, endTime: Date): Promise<GoogleFitSession[]> {
+  if (!this.googleUser) {
+    throw new Error('User not signed in');
+  }
+
+  const accessToken = this.googleUser.getAuthResponse().access_token;
+  const headers = new HttpHeaders({
+    'Authorization': 'Bearer ' + accessToken,
+    'Content-Type': 'application/json'
+  });
+
+  const startTimeMillis = startTime.getTime().toString();
+  const endTimeMillis = endTime.getTime().toString();
+
+  // Correctly constructing the query parameters
+  const params = new HttpParams()
+    .set('startTime', startTimeMillis)
+    .set('endTime', endTimeMillis)
+    .set('includeDeleted', 'false');
+
+  try {
+    const response = await this.http.get<ListSessionsResponse>(
+      `https://www.googleapis.com/fitness/v1/users/me/sessions`, {
+        headers,
+        params // Make sure to pass params here
+      }
+    ).toPromise();
+
+    if (response && response.session) {
+      return response.session; // Assuming 'session' is the correct field name
+    } else {
+      throw new Error('No sessions returned from Google Fit');
+    }
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    throw error; // Propagate error to be handled by caller
+  }
+}
+
+
+async listActivities1(startTime: Date, endTime: Date): Promise<GoogleFitSession[]> {
+  if (!this.googleUser) {
+    throw new Error('User not signed in');
+  }
+
+  const accessToken = this.googleUser.getAuthResponse().access_token;
+  const headers = new HttpHeaders({
+    'Authorization': 'Bearer ' + accessToken,
+    'Content-Type': 'application/json'
+  });
+
+  const startTimeMillis = startTime.getTime().toString();
+  const endTimeMillis = endTime.getTime().toString();
+
+  try {
+    const response = await this.http.get<ListSessionsResponse>(
+      `https://www.googleapis.com/fitness/v1/users/me/sessions`,
+      { headers }
+    ).pipe(
+      catchError((err) => {
+        console.error('Error fetching activities:', err);
+        return throwError(err); // or return of([]) if you want to return an empty array on error
+      })
+    ).toPromise();
+
+    if (response) {
+      return response.session; // Replace 'session' with the correct field from response if different
+    } else {
+      throw new Error('Response was undefined.');
+    }
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    throw error; // Rethrow the error if you want to handle it in the component
+  }
+}
+
+
+// Method to get heart rate data for a specific session
+async getHeartRateDataForSession(startTimeMillis: string, endTimeMillis: string): Promise<any[]> {
+  if (!this.googleUser) {
+    throw new Error('User not signed in');
+  }
+
+  const accessToken = this.googleUser.getAuthResponse().access_token;
+  const headers = new HttpHeaders({
+    'Authorization': 'Bearer ' + accessToken,
+    'Content-Type': 'application/json'
+  });
+
+  const requestBody = {
+    aggregateBy: [{
+      dataTypeName: 'com.google.heart_rate.bpm'
+    }],
+    bucketByTime: { durationMillis: parseInt(endTimeMillis) - parseInt(startTimeMillis) },
+    startTimeMillis: startTimeMillis,
+    endTimeMillis: endTimeMillis
+  };
+
+  try {
+    const response = await this.http.post<GoogleFitDataSetsResponse>(
+      `https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate`,
+      requestBody,
+      { headers }
+    ).toPromise();
+
+    // Ensure the response is not undefined and has the expected structure
+    if (response && response.bucket) {
+      // Flatten the array of buckets and extract heart rate data points
+      const heartRateDataPoints = response.bucket.flatMap(bucket =>
+        bucket.dataset.flatMap(dataset => dataset.point)
+      );
+      return heartRateDataPoints;
+    } else {
+      return []; // No data points found
+    }
+  } catch (error) {
+    console.error('Error fetching heart rate data points for session:', error);
+    throw error;
+  }
+}
+
+// Method to get calories data for a specific session
+async getCaloriesBurnedForSession(startTimeMillis: string, endTimeMillis: string): Promise<number> {
+  if (!this.googleUser) {
+    throw new Error('User not signed in');
+  }
+
+  const accessToken = this.googleUser.getAuthResponse().access_token;
+  const headers = new HttpHeaders({
+    'Authorization': 'Bearer ' + accessToken,
+    'Content-Type': 'application/json'
+  });
+
+  const requestBody = {
+    aggregateBy: [{
+      dataTypeName: 'com.google.calories.expended'
+    }],
+    bucketByTime: { durationMillis: parseInt(endTimeMillis) - parseInt(startTimeMillis) },
+    startTimeMillis: startTimeMillis,
+    endTimeMillis: endTimeMillis
+  };
+
+  try {
+    const response = await this.http.post<AggregateResponse>(
+      `https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate`,
+      requestBody,
+      { headers }
+    ).toPromise();
+
+    if (response && response.bucket && response.bucket.length > 0) {
+      // The structure of the response may vary. You might need to adjust this logic to fit the actual response structure.
+      const caloriesData = response.bucket[0].dataset[0].point.reduce((totalCalories, point) => {
+        const calories = point.value[0].fpVal || point.value[0].intVal || 0;
+        return totalCalories + calories;
+      }, 0);
+
+      return caloriesData;
+    } else {
+      return 0; // No data points found
+    }
+  } catch (error) {
+    console.error('Error fetching calories burned data for session:', error);
+    throw error;
+  }
+}
+
+
+async saveWorkoutDetails(workoudData: WorkoutDetails): Promise<void> {
+  try {
+    const userRunsRef = collection(this.firestore, `users/${workoudData.userId}/gym`);
+    const docRef = await addDoc(userRunsRef, {
+      ...workoudData,
+      timestamp: new Date() // set the timestamp when saving the data
+    });
+    console.log("Workout saved with ID: ", docRef.id);
+  } catch (error) {
+    console.error("Error adding run data: ", error);
+    
+  }
+}
 
 }
