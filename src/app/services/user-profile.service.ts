@@ -5,9 +5,8 @@ import { AuthenticationService } from './authentication.service';
 import { Observable, throwError, Subject } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
-import { RunData, Activity } from '../models/model/model';
-import { DocumentData } from '@angular/fire/firestore';
-import { forkJoin } from 'rxjs';
+import { RunData, Activity, Run } from '../models/model/model';
+import { Gym } from '../models/model/model';
 @Injectable({
   providedIn: 'root'
 })
@@ -329,8 +328,63 @@ private mapToActivity(doc: any): Activity {
     userId,
    
   };
+
 }
 
+getUserGyms(userId: string): Observable<Gym[]> {
+  const gymsRef = collection(this.firestore, `users/${userId}/gym`);
+  return collectionData(gymsRef).pipe(
+    map(docs => docs.map(this.mapToGym))
+  );
+}
+
+getUserRuns(userId: string): Observable<Run[]> {
+  const gymsRef = collection(this.firestore, `users/${userId}/runs`);
+  return collectionData(gymsRef).pipe(
+    map(docs => docs.map(this.mapToRun))
+  );
+}
+
+private mapToRun(doc: any): Run {
+  const distanceInMeters = doc.distance;
+  const distanceInKilometers = distanceInMeters / 1000; // Convert meters to kilometers
+  const elapsedTimeInSeconds = doc.elapsedTime;
+  const pace = doc.pace;
+  const timestamp = doc.timestamp.toDate();
+  const userId = doc.userId;
+
+  return {
+    type: 'run', // or 'gym' depending on the activity type
+    distance: distanceInKilometers,
+    elapsedTime: elapsedTimeInSeconds,
+    pace,
+    timestamp,
+    userId,
+   
+  };
+
+}
+
+// Map Firestore document data to Gym object
+private mapToGym(doc: any): Gym {
+  const highestHeartRate = doc.highestHeartRate;
+  const latestHeartRate = doc.latestHeartRate;
+  const lowestHeartRate = doc.lowestHeartRate;
+  const caloriesBurned = doc.caloriesBurned;
+  const timestamp = doc.timestamp.toDate();
+  const userId = doc.userId;
+
+  return {
+    type: 'gym',
+    highestHeartRate,
+    latestHeartRate,
+    lowestHeartRate,
+    caloriesBurned,
+    timestamp,
+    userId,
+    // ... any other fields that are relevant to a Gym activity
+  };
+}
 
 
 

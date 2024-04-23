@@ -7,7 +7,8 @@ import { map } from 'rxjs/operators';
 import { UserProfileService } from 'src/app/services/user-profile.service';
 import { LoadingController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
-import { Activity } from 'src/app/models/model/model';
+import { Activity, Gym, Run } from 'src/app/models/model/model';
+import { Observable } from 'rxjs';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -29,6 +30,9 @@ export class ProfilePage implements OnInit {
 
   selectedSegment: 'runs' | 'gym' = 'runs';
   activities: Activity[] = [];
+
+  runsData$!: Observable<Run[]>;
+  gymData$!: Observable<Gym[]> 
 
 
   // Form group for user profile data with default values and validators
@@ -60,6 +64,8 @@ export class ProfilePage implements OnInit {
           // Now that you have the user, you can load the profile
           this.loadUserProfile(this.uid);
           this.fetchActivities();
+          this.runsData$ = this.userProfileService.getUserActivities(this.uid, 'runs');
+          this.gymData$ = this.userProfileService.getUserActivities(this.uid, 'gym');
         } else {
           // User is not authenticated, handle accordingly
           console.error('User not authenticated');
@@ -82,11 +88,20 @@ export class ProfilePage implements OnInit {
 
   }
 
-  fetchActivities() {
-    this.userProfileService.getUserActivities(this.uid, this.selectedSegment).subscribe(activities => {
-      this.activities = activities;
-    });
+// In profile.page.ts
+fetchActivities() {
+  // Clear the current activities to prevent display of old data
+  this.activities = [];
+
+  if (this.uid) {
+    if (this.selectedSegment === 'runs') {
+      this.runsData$ = this.userProfileService.getUserRuns(this.uid);
+    } else {
+      this.gymData$ = this.userProfileService.getUserGyms(this.uid);
+    }
   }
+}
+
   // Function to load user profile data
 loadUserProfile(uid: string) {
   this.userProfileService.getUserProfile(uid).subscribe(

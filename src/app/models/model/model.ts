@@ -9,17 +9,40 @@ export interface User {
     email: string;
   }
   
-  // activity.model.ts
+
 export interface Activity {
   id?: string;
   userId: string;
   type: 'run' | 'gym';
-  //date: Date;
+  highestHeartRate?: number;
+  latestHeartRate?: number;
+  lowestHeartRate?: number; // Add this property
   distance?: number; // For runs
   elapsedTime?: number; // For runs and gym sessions
   caloriesBurned?: number; // For gym sessions
   pace?: number;
   timestamp: any;
+}
+
+export interface Run{
+  type: 'run' | 'gym';
+  id?: string;
+  userId: string;
+  distance?: number; // For runs
+  elapsedTime?: number; // For runs and gym sessions
+  pace?: number;
+  timestamp: any;
+}
+
+export interface Gym{
+  type: 'run' | 'gym';
+  highestHeartRate?: number;
+  latestHeartRate?: number;
+  lowestHeartRate?: number; // Add this property
+  id?: string;
+  userId: string;
+  timestamp: any;
+  caloriesBurned?: number; // For gym sessions
 }
 
  
@@ -73,6 +96,22 @@ export interface Post {
     
   }
 
+  export interface WorkoutDetails{
+    userId: any;
+    duration?: any; 
+    heartRate?: any;
+    latestHeartRate?: number;
+    highestHeartRate?: number;
+    lowestHeartRate?: number;
+    caloriesBurned?: number;
+    timestamp: Date; // date and time when the run was logged
+  }
+
+  export interface HeartRateDataPoint {
+    fpVal: number;
+    
+  }
+
   export interface GoogleFitHeartRateValue {
     intVal?: number;  // Integer value, optional because not all points will have it
     fpVal?: number;   // Floating-point value, optional because not all points will have it
@@ -86,6 +125,7 @@ export interface Post {
   
   export interface GoogleFitDataSet {
     point: GoogleFitHeartRatePoint[];
+    bucket: GoogleFitHeartRateResponse[];
   }
   
   export interface GoogleFitBucket {
@@ -94,6 +134,18 @@ export interface Post {
   
   export interface GoogleFitHeartRateResponse {
     bucket: GoogleFitBucket[];
+  }
+
+  export interface GoogleFitSession {
+    id: string;
+    name: string;
+    description: string;
+    // Add other session properties you need
+  }
+
+  export interface ListSessionsResponse {
+    session: GoogleFitSession[];
+    // Add other response properties as needed
   }
   
   

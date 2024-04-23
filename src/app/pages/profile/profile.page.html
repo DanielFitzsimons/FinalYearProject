@@ -123,12 +123,31 @@
     </ion-segment-button>
   </ion-segment>
   
-  <ion-list>
-    <ion-item *ngFor="let activity of activities">
-      <!-- Display activity details -->
-      {{ activity.timestamp | date }}: {{ activity.distance ? activity.distance + ' km' : activity.elapsedTime + ' min' }}
+  <ion-list *ngIf="selectedSegment === 'runs'">
+    <ion-item *ngFor="let run of runsData$ | async">
+      <!-- Display run activity details -->
+      <ul>
+        <li>{{ run.timestamp | date }}</li>
+        <li>{{ run.distance + ' km' }}</li>
+        <li>{{ run.elapsedTime + ' min' }}</li>
+      </ul>
     </ion-item>
   </ion-list>
+  
+  <ion-list *ngIf="selectedSegment === 'gym'">
+    <ion-item *ngFor="let gym of gymData$ | async">
+      <ul>
+        <li>Date and Time: {{ gym.timestamp }}</li>
+        <li>Calories Burned: {{ gym.caloriesBurned }}</li>
+        <li>Highest Heart Rate: {{ gym.highestHeartRate }}</li>
+        <li>Latest Heart Rate: {{ gym.latestHeartRate }}</li>
+        <li>Lowest Heart Rate: {{ gym.lowestHeartRate }}</li>
+    </ul>
+    </ion-item>
+  </ion-list>
+  
+
+   
 
 </ion-content>
 
