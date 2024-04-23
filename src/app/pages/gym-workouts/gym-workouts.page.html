@@ -8,35 +8,43 @@
     <ion-title>Workout Tracker</ion-title>
   </ion-toolbar>
 </ion-header>
+<!-- GymWorkoutsPage template -->
+<ion-button (click)="openDatePickerModal()">Select Date/Time</ion-button>
+
+
 
 <ion-content>
-  <ion-list>
-    <ion-item>
-      <ion-label position="floating">Exercise Name</ion-label>
-      <ion-input [(ngModel)]="currentExercise"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Number of Sets</ion-label>
-      <ion-input type="number" [(ngModel)]="numberOfSets"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Number of Reps</ion-label>
-      <ion-input type="number" [(ngModel)]="numberOfReps"></ion-input>
-    </ion-item>
-  </ion-list>
-  
-  <div class="workout-info">
-    <h2>Workout Information:</h2>
-    <p>Current Heart Rate: {{ heartRate }} bpm</p>
-    <p>Workout Duration: {{ formatDuration(workoutDuration) }}</p>
-    <p>Last Exercise: {{ lastExercise }}</p> <!-- Display last exercise name -->
+  <div *ngIf="isSignedIn">
+    <ion-card *ngIf="sessionData">
+      <ion-card-header>
+        <h2>Session Data</h2>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Start Time: {{ convertNanosToDate(sessionData?.startTimeNanos) }}</p>
+        <p>End Time: {{ convertNanosToDate(sessionData?.endTimeNanos) }}</p>
+        <p>Description: {{ sessionData?.description }}</p>
+        
+        <!-- Heart Rate Values -->
+        <h2>Heart Rate Values</h2>
+        <ul>
+          <li><i class="fa-solid fa-heart-pulse"></i> Latest: {{ latestHeartRate }} BPM</li>
+          <li><i class="fa-solid fa-chart-line"></i> Highest: {{ highestHeartRate }} BPM</li>
+          <li><i class="fa-solid fa-heart-crack"></i> Lowest: {{ lowestHeartRate }} BPM</li>
+        </ul>
+        <p class="calories-burned"><i class="fa-solid fa-fire"></i> Calories Burned: {{ caloriesBurned | number:'1.0-2' }} kcal</p>
+        
+      </ion-card-content>
+    </ion-card>
+    
+    <!-- <pre>{{ sessionData | json }}</pre> -->
   </div>
 
   <!-- Control Buttons for Actions -->
   <ion-button (click)="signInWithGoogle()" color="secondary">Sign in with Google</ion-button>
-  <ion-button (click)="startWorkout()" color="success">Start Workout</ion-button>
-  <ion-button (click)="endWorkout()" color="danger">End Workout</ion-button>
+  <!-- <ion-button (click)="startWorkout()" color="success">Start Workout</ion-button>
+  <ion-button (click)="endWorkout()" color="danger">End Workout</ion-button> -->
   
   <!-- Additional details and controls -->
   <ion-button (click)="saveWorkout()" color="primary">Save Workout</ion-button>
+  <ion-button (click)="fetchActivities()" color="primary">Activities</ion-button>
 </ion-content>

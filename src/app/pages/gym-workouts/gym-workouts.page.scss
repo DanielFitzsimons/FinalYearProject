@@ -1,0 +1,65 @@
+ion-card {
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    border-radius: 10px;
+    margin: 16px;
+  }
+
+  ion-card-header {
+    background-color: #f8f8f8;
+    border-top-left-radius: 10px; /* Match ion-card border-radius */
+    border-top-right-radius: 10px; /* Match ion-card border-radius */
+    padding: 16px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  ion-card-content {
+    padding: 16px;
+    line-height: 1.6; /* Makes text more readable */
+  }
+
+  ion-card-content ul {
+    list-style-type: none; /* Removes the default list style */
+    padding: 0;
+    margin: 0;
+  }
+  
+  ion-card-content ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0; /* Adds a separator line */
+  }
+  
+  ion-card-content ul li:last-child {
+    border-bottom: none; /* Removes the bottom line for the last item */
+  }
+
+  ion-content {
+    --background: none;
+    background-image: url('../../../images/gymworkoutPage.png');
+    background-size: cover; /* Cover the entire viewport */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+  }
+  
+
+  .calories-burned {
+    color: #E53935; /* A red color for emphasis */
+    font-weight: bold;
+    margin-top: 16px; /* Adds some space before the calories */
+  }
+
+  ion-datetime {
+    max-height: 500px; /* or any other appropriate value */
+    overflow: auto; /* to add scroll if the content is too long */
+  }
+  
+
+  @media (max-width: 768px) {
+    ion-card {
+      margin: 8px;
+    }
+  }
+  
+  
+  
