@@ -42,12 +42,6 @@ After installing the app, you can:
 - Communicate with your fitness community.
 - Share and view media files related to your fitness activities.
 
-## Contributing
-We welcome contributions to the Social Fitness App. Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests to us.
-
-## License
-This project is licensed under the MIT License - see the `LICENSE.md` file for details.
-
 ## Acknowledgments
 - Google Maps for providing the mapping services that allow our users to track their fitness activities.
 - Firebase for hosting the backend services that power our community features.
