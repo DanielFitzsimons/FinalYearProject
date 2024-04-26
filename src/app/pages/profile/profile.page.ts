@@ -112,7 +112,7 @@ loadUserProfile(uid: string) {
         this.profileForm.patchValue({
           email: userProfileData.email, // Assuming 'email' is a field in the userProfileData
           name: userProfileData.name, // Assuming 'name' is a field in the userProfileData
-          age: userProfileData.age, // Assuming 'age' is a field in the userProfileDa // Assuming 'address' is a field
+          age: userProfileData.age, // Assuming 'age' is a field in the userProfileData
         });
         // Show the profile data in the template
         this.showProfileData = true;
@@ -166,77 +166,6 @@ loadUserProfile(uid: string) {
     }
   }
 
-  // onDelete() {
-  //   // Ensure that this.uid is defined and not empty
-  //   if (this.uid) {
-  //     // Construct the document reference with a valid path
-  //     const userProfileRef = doc(this.firestore, `users/${this.uid}`);
-  
-  //     // Get the existing document data
-  //     getDoc(userProfileRef)
-  //       .then((docSnap) => {
-  //         if (docSnap.exists()) {
-  //           // Extract the email field
-  //           const { email } = docSnap.data();
-  
-  //           // Create a new object with only the email field
-  //           const updatedData = { email };
-  
-  //           // Update the document with the new object
-  //           setDoc(userProfileRef, updatedData, { merge: true })
-  //             .then(() => {
-  //               console.log('User profile updated successfully!');
-  //               this.showProfileData = true; // Show profile data after update
-  //             })
-  //             .catch((error) => {
-  //               console.error('Error updating user profile: ', error);
-  //             });
-  //         } else {
-  //           console.error('User profile not found');
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error fetching user profile data: ', error);
-  //       });
-  //   } else {
-  //     console.error('User UID is undefined or null.');
-  //   }
-  // }
-
-  // Method to delete a specific field from user profile
-  // onDelete(fieldToDelete: string) {
-  //   // Ensure that UID is defined and not empty
-  //   if (this.uid) {
-  //     // Construct the document reference for the user profile
-  //     const userProfileRef = doc(this.firestore, `users/${this.uid}`);
-
-  //     // Fetch the existing user profile document
-  //     getDoc(userProfileRef).then((docSnap) => {
-  //       if (docSnap.exists()) {
-  //         // If the document exists, update it by removing the specified field
-  //         const updatedData = { [fieldToDelete]: null };
-
-  //         // Use the updateDoc method to remove the specified field
-  //         updateDoc(userProfileRef, updatedData)
-  //           .then(() => {
-  //             console.log(`Field '${fieldToDelete}' deleted successfully from user profile!`);
-  //             this.showProfileData = true; // Set flag to show profile data in the template
-  //           })
-  //           .catch((error) => {
-  //             console.error(`Error deleting field '${fieldToDelete}' from user profile: `, error);
-  //           });
-  //       } else {
-  //         console.error('User profile not found');
-  //       } 
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error fetching user profile data: ', error);
-  //     });
-  //   } else {
-  //     console.error('User UID is undefined or null.');
-  //   }
-  // }
-
   toggleForm() {
     this.showForm = !this.showForm;
   }
@@ -244,7 +173,7 @@ loadUserProfile(uid: string) {
   async presentLoading() {
     this.loading = await this.loadingController.create({
       message: 'Saving data...',
-      spinner: 'dots', // You can choose a different spinner if you prefer
+      spinner: 'dots', 
     });
     await this.loading.present();
   }
@@ -286,7 +215,7 @@ loadUserProfile(uid: string) {
     this.userProfileService.updateUserProfileField(this.uid, 'picture', imageUrl)
       .subscribe({
         next: () => {
-          // Handle successful update, e.g., show a success message or refresh the profile picture display
+          // Handle successful update
           console.log('Profile picture updated successfully.');
         },
         error: (error) => {
@@ -294,6 +223,5 @@ loadUserProfile(uid: string) {
         }
       });
   }
-  
   
 }

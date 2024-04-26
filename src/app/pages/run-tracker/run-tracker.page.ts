@@ -40,7 +40,7 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
     private popoverController: PopoverController) {}
 
   ngOnInit() {
-    this.checkPermissions();
+    this.requestPermissions();
   }
 
   ngAfterViewInit() {
@@ -59,6 +59,8 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
     this.loadMap();
     
     this.setCurrentPosition();
+
+    this.checkPermissions();
   }
 
   async checkPermissions() {
@@ -83,50 +85,51 @@ export class RunTrackerPage implements OnInit, AfterViewInit {
     }
   }
 
-  // Method to load the map
-  loadMap() {
-    const mapOptions: google.maps.MapOptions = {
-      center: { lat: -34.397, lng: 150.644 },
-      zoom: 15,
-    };
+ // Method to load the map
+loadMap() {
+  // Set map options
+  const mapOptions: google.maps.MapOptions = {
+    center: { lat: -34.397, lng: 150.644 }, // Default center coordinates
+    zoom: 15, // Default zoom level
+  };
 
-    const mapElement = document.getElementById('map');
-    if (mapElement) {
-      // Create a new Google Map and assign it to the map property
-      this.map = new google.maps.Map(mapElement, mapOptions);
-    } else {
-      console.error('Map element not found');
-    }
+  // Get the map element
+  const mapElement = document.getElementById('map');
+  if (mapElement) {
+    // Create a new Google Map and assign it to the map property
+    this.map = new google.maps.Map(mapElement, mapOptions);
+  } else {
+    console.error('Map element not found');
   }
+}
 
-  // Method to set the current position on the map
-  async setCurrentPosition() {
-    try {
-      // Get the current position using the Geolocation API
-      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true});
-      console.log("Current Position: " , position);
-      const currentPos = new google.maps.LatLng(
-        position.coords.latitude,
-        position.coords.longitude
-      );
+// Method to set the current position on the map
+async setCurrentPosition() {
+  try {
+    // Get the current position using the Geolocation API
+    const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+    console.log("Current Position: ", position);
+    // Create a LatLng object from the current position coordinates
+    const currentPos = new google.maps.LatLng(
+      position.coords.latitude,
+      position.coords.longitude
+    );
 
-      if (this.map) {
-        // Place a marker on the current position
-        this.userMarker = new google.maps.Marker({
-          position: currentPos,
-          map: this.map,
-          title: 'Your Location',
-        });
+    if (this.map) {
+      // Place a marker on the current position
+      this.userMarker = new google.maps.Marker({
+        position: currentPos,
+        map: this.map,
+        title: 'Your Location',
+      });
 
-        // Center the map on the user's current position
-        this.map.setCenter(currentPos);
-
-        //this.addPulseEffect(this.map, currentPos);
-      }
-    } catch (err) {
-      console.error('Could not get current position', err);
+      // Center the map on the user's current position
+      this.map.setCenter(currentPos);
     }
+  } catch (err) {
+    console.error('Could not get current position', err);
   }
+}
 
 // Method to start tracking the run
 async startTracking() {
@@ -134,18 +137,17 @@ async startTracking() {
     // Get the current position using the Geolocation API
     const position = await Geolocation.getCurrentPosition();
     console.log("Start tracking position: ", position);
+    // Create a LatLng object for the start location
     const startLocation = new google.maps.LatLng(
       position.coords.latitude,
       position.coords.longitude
     );
 
-    this.previousPosition = this.startLocation;
-
     // Generate waypoints for a rough circular route
-  const waypoints = this.generateCircularPathWaypoints(startLocation, this.selectedRunDistance / 4);
+    const waypoints = this.generateCircularPathWaypoints(startLocation, this.selectedRunDistance / 4);
 
-  // Use Google Maps Directions API to get the route
-  const directions = await this.getDirections(startLocation, waypoints);
+    // Use Google Maps Directions API to get the route
+    const directions = await this.getDirections(startLocation, waypoints);
 
     if (this.map && directions !== null && directions.routes && directions.routes.length > 0) {
       // Draw the route on the map using polylines
@@ -166,7 +168,6 @@ async startTracking() {
         title: 'Start',
       });
 
-
       // Center the map on the route
       const bounds = new google.maps.LatLngBounds();
       routePolyline.getPath().forEach((latLng: any) => {
@@ -181,19 +182,29 @@ async startTracking() {
   }
 
   await this.setStartLocation();
-
-  
 }
 
+// Method to start the run
 async beginRun() {
-  await this.setStartLocation(); 
-  this.startLiveTracking();
-  this.startTime = new Date();
-  this.startTimer();
+  await this.setStartLocation(); // Set the start location
+  this.startLiveTracking(); // Start live tracking of the user
+  this.startTime = new Date(); // Get start time for today
+  this.startTimer(); // Start the timer
 }
 
 
 
+
+async setStartLocation() {
+  const position = await Geolocation.getCurrentPosition();
+  // Create a LatLng object for the start location
+  this.startLocation = new google.maps.LatLng(
+    position.coords.latitude,
+    position.coords.longitude
+  );
+  // Ensure previousPosition is set for distance calculations
+  this.previousPosition = this.startLocation;
+}
 
 
 // Method to generate waypoints to create a rough circular route
@@ -321,7 +332,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
       return "0.00"; // Set an initial value of "0.00" when startTime is not set
     }
   
-    const currentTime = new Date();
+    const currentTime = new Date(); //get current time to date 
     const timeDiff = (currentTime.getTime() - this.startTime.getTime()) / 1000; // Time difference in seconds
     const distanceKm = this.totalDistance / 1000; // Distance in kilometers
   
@@ -344,6 +355,7 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
     }, 1000); // Update every second
   }
   
+  // Method to format time in HH:MM:SS format
   formatTime(timeInMillis: number): string {
     let seconds = Math.floor(timeInMillis / 1000);
     let minutes = Math.floor(seconds / 60);
@@ -354,20 +366,11 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
   
     return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
-  
+  // Method to pad single-digit numbers with leading zeros
   pad(num: number): string {
     return num < 10 ? `0${num}` : num.toString();
   }
 
-    // Method to set the start location
-    async setStartLocation() {
-      const position = await Geolocation.getCurrentPosition();
-      this.startLocation = new google.maps.LatLng(
-        position.coords.latitude,
-        position.coords.longitude
-      );
-      this.previousPosition = this.startLocation; // Ensure this is set for distance calculations.
-    }
   
    
   
@@ -423,7 +426,6 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
         })
         .catch(error => {
           console.error("Error saving run data:", error);
-          // Handle any errors, perhaps with another alert
         });
       } else {
         console.error("User is not authenticated or ID is missing");
@@ -433,46 +435,48 @@ async getDirections(start: google.maps.LatLng, waypoints: google.maps.Directions
   
 
 
-   addPulseEffect(map: any, position: any) {
-    const overlay = new google.maps.OverlayView();
-    
-    overlay.onAdd = function() {
-      const panes = this.getPanes();
-      if (!panes) {
-        console.error('Map panes are not available yet.');
-        return;
+  // Method to add a pulse effect to the map
+addPulseEffect(map: any, position: any) {
+  const overlay = new google.maps.OverlayView();
+
+  overlay.onAdd = function () {
+    const panes = this.getPanes();
+    if (!panes) {
+      console.error('Map panes are not available yet.');
+      return;
+    }
+
+    const layer = document.createElement('div');
+    layer.className = 'pulse';
+    panes.overlayLayer.appendChild(layer);
+
+    overlay.draw = () => {
+      const projection = this.getProjection();
+      const pixelPosition = projection.fromLatLngToDivPixel(position);
+
+      if (pixelPosition) {
+        layer.style.left = `${pixelPosition.x}px`;
+        layer.style.top = `${pixelPosition.y}px`;
       }
-  
-      const layer = document.createElement('div');
-      layer.className = 'pulse';
-      panes.overlayLayer.appendChild(layer);
-  
-      overlay.draw = () => {
-        const projection = this.getProjection();
-        const pixelPosition = projection.fromLatLngToDivPixel(position);
-  
-        if (pixelPosition) {
-          layer.style.left = `${pixelPosition.x}px`;
-          layer.style.top = `${pixelPosition.y}px`;
-        }
-      };
     };
+  };
+
+  overlay.setMap(map);
+}
   
-    overlay.setMap(map);
-  }
-  
-  async presentRunSummaryPopover(runData: RunData) {
-    const popover = await this.popoverController.create({
-      component: RunSummaryPopoverComponent,
-      componentProps: {
-        distance: `${(runData.distance / 1000).toFixed(2)}`,
-        pace: `${runData.pace.toFixed(2)}`,
-        time: this.formatTime(runData.elapsedTime)
-      },
-      cssClass: 'run-summary-popover'
-    });
-    await popover.present();
-  }
+  // Method to present run summary in a popover
+async presentRunSummaryPopover(runData: RunData) {
+  const popover = await this.popoverController.create({
+    component: RunSummaryPopoverComponent,
+    componentProps: {
+      distance: `${(runData.distance / 1000).toFixed(2)}`,
+      pace: `${runData.pace.toFixed(2)}`,
+      time: this.formatTime(runData.elapsedTime)
+    },
+    cssClass: 'run-summary-popover'
+  });
+  await popover.present();
+}
   
   
   

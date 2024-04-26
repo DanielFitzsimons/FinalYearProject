@@ -1,8 +1,8 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+<ion-header>
+  <ion-toolbar color="secondary">
     <ion-buttons slot="start">
       <ion-back-button (click)="goToHomePage()" ></ion-back-button>
-    </ion-buttons>
+    </ion-buttons>  
     <ion-title>Groups Page</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -36,9 +36,9 @@
   <ion-list *ngIf="groups.length > 0; else noGroupsFound">
     <ion-item *ngFor="let group of groups">
       <ion-label>
-        <h3>{{ group.groupName }}</h3>
+        
+      </ion-label><h3>{{ group.groupName }}</h3>
         <p>{{ group.groupDescription }}</p>
-      </ion-label>
       <ion-button fill="outline" slot="end" (click)="joinGroup(group)">Join</ion-button>
     </ion-item>
   </ion-list>
@@ -56,11 +56,6 @@
         <h3>{{ group.groupName }}</h3>
         <p>{{ group.groupDescription }}</p>
       </ion-label>
-      <ion-button  fill="outline" slot="end" (click)="deleteGroup(group)">
-        <ion-icon name="trash-outline"></ion-icon>Delete
-      </ion-button>
-      
-      
     </ion-item>
   </ion-list>
 </div>

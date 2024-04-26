@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="secondary">
     <ion-buttons slot="start">
       <ion-button routerLink="/messaging">
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
@@ -21,8 +21,8 @@
           <p>{{ message.content }}</p>
         </div>
         <div class="sender-name">{{ message.senderName }}</div>
-        <div class="message-timestamp">{{ message.timestamp.toDate() | date:'short' }}</div>
-      </div>
+        <div class="message-timestamp">{{ convertTimestampToDate(message.timestamp) | date:'short' }}</div>
+    </div>
     </ion-item>
   </ion-list>
 </ion-content>

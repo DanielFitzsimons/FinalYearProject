@@ -8,6 +8,7 @@ import { Observable, forkJoin, from } from 'rxjs';
 import { Team, Post } from 'src/app/models/model/model';
 import { GroupService } from 'src/app/services/group.service';
 import { EMPTY } from 'rxjs';
+import { Timestamp } from '@angular/fire/firestore';
 @Component({
   selector: 'app-feed',
   templateUrl: './feed.component.html',
@@ -95,25 +96,22 @@ export class FeedComponent implements OnInit {
         return forkJoin(postsObservables);
       }),
       map((postsArrays: Post[][]) => {
-        console.log(`Fetched posts for all groups, total post arrays: ${postsArrays.length}`);
-        const allPosts = postsArrays.flat().map(doc => {
+        const allPosts = postsArrays.flat().map(post => {
           let timestamp: Date | null = null;
-          if (doc.timestamp) {
-            try {
-              timestamp = new Date(doc.timestamp);
-              if (isNaN(timestamp.getTime())) {
-                timestamp = null;
-              }
-            } catch {
-              timestamp = null;
-            }
+      
+          if (post.timestamp && post.timestamp instanceof Timestamp) {
+            timestamp = post.timestamp.toDate();
+          } else if (post.timestamp instanceof Date) {
+            timestamp = post.timestamp;
           }
+      
           return {
-            ...doc,
-            timestamp // This will be a valid Date object or null
+            ...post,
+            timestamp // Now it is guaranteed to be a Date object or null
           };
         });
-  
+      
+        // Sorting the posts by date
         return allPosts.sort((a, b) => {
           const dateA = a.timestamp ? a.timestamp.getTime() : 0;
           const dateB = b.timestamp ? b.timestamp.getTime() : 0;
@@ -132,11 +130,11 @@ export class FeedComponent implements OnInit {
   
 
 //allows for editing of post text through service
-  editPost(post: any) {
+ /* editPost(post: any) {
     const updatedContent = prompt('Enter updated content:', post.content);
 
     if (updatedContent !== null && updatedContent !== undefined) {
-      this.userProfileService.editPost(post.id, updatedContent).subscribe(
+      this.userProfileService.editPost(this.groupId, post.id, updatedContent).subscribe(
         () => {
           console.log('Post updated successfully!');
           // Reload posts after updating
@@ -147,7 +145,7 @@ export class FeedComponent implements OnInit {
         }
       );
     }
-  }
+  }*/
   
   // deletePost(post: any) {
   //   const confirmDelete = confirm('Are you sure you want to delete this post?');
@@ -167,7 +165,7 @@ export class FeedComponent implements OnInit {
   // }
 
   //allows for deletin of posts through service
-  deletePost(post: any) {
+ /* deletePost(post: any) {
     this.auth.getCurrentUser().subscribe(currentUser => {
       if (currentUser) {
         const currentUserId: string = currentUser.uid; 
@@ -190,6 +188,6 @@ export class FeedComponent implements OnInit {
         console.log('User not authenticated');
       }
     });
-  }
+  }*/
 }  
 

@@ -35,6 +35,7 @@ export class HomePage {
 
   }
 
+  //method to log user out and redirect to authenticator page
   async logout(){
     await this.authService.logout();
 

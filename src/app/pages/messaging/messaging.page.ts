@@ -78,6 +78,25 @@ export class MessagingPage implements OnInit {
     },
     error: (error) => console.error(error)
   });
+
+  this.auth.currentUser$.subscribe({
+    next: (user) => {
+      if (user) {
+        this.groupService.getGroupsWithLastMessage(user.uid)
+          .subscribe({
+            next: (groups) => {
+              this.groups = groups;
+            },
+            error: (error) => {
+              console.error('Error fetching groups with last message:', error);
+            }
+          });
+      } else {
+        console.error('User not authenticated');
+      }
+    },
+    error: (error) => console.error(error)
+  });
   
     // Get the list of all users for starting new conversations
     this.users$ = this.messageService.getUsers(); // Initialize the users Observable
@@ -97,7 +116,7 @@ export class MessagingPage implements OnInit {
       });
   }
 
-
+ 
 
 openGroupChat(group: Team) {
   this.router.navigate(['/chat-page', group.id]);

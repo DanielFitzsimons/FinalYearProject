@@ -13,20 +13,22 @@ import { Router} from '@angular/router';
   styleUrls: ['./groups-page.page.scss'],
 })
 export class GroupsPagePage implements OnInit {
-
+  // Define the form for creating new group
   groupForm = this.fb.group({
     groupName: ['', Validators.required],
     groupDescription: ['']
   });
 
+  // Array to store all groups
   groups: Team[] = [];
 
+  // Array to store all groups (including user's groups and other groups)
   allGroups: Team[] = [];
-
+  // Array to store user's groups
   userGroups: Team[] = [];
-  
+   // Flag to indicate whether a search has been performed
   searchPerformed = false;
-
+  // Current user object
   currentUser: User | null = null;
   
 
@@ -35,11 +37,10 @@ export class GroupsPagePage implements OnInit {
   constructor(private fb: FormBuilder, private groupService: GroupService, private userService: UserProfileService, private auth: AuthenticationService, private router: Router ) {}
 
   ngOnInit() {
-    // Inside a component that needs user information
+    // subscribe to current user changes
     this.auth.currentUser$.subscribe(user => {
       if (user) {
         // User is signed in
-        
         console.log(user);
         this.fetchUserGroups();
       } else {
@@ -48,6 +49,7 @@ export class GroupsPagePage implements OnInit {
       }
     });
 
+    //fetch all groups
     this.fetchGroups();
     
   }
@@ -62,21 +64,24 @@ export class GroupsPagePage implements OnInit {
     }
   } */
 
+  //fetch all groups
   async fetchGroups() {
     try {
       this.allGroups = await this.groupService.getGroups(); // Fetch all groups
-      this.groups = [...this.allGroups]; // Initially, display all groups or you could choose to display none
+      this.groups = [...this.allGroups]; // Initially, display all groups
       console.log('Fetched groups:', this.groups);
     } catch (error) {
       console.error('Error fetching groups:', error);
     }
   }
   
-  
+  // Fetch user's groups
   async fetchUserGroups() {
     try {
       const user = await firstValueFrom(this.auth.getCurrentUser());
+      //check if it is a user, and if it is, proceed
       if (user && user.uid) {
+        // Fetch groups associated with the current user
         this.groupService.getGroupsForUser(user.uid).subscribe(
           (userGroups: Team[]) => {
             this.userGroups = userGroups;
@@ -98,12 +103,13 @@ export class GroupsPagePage implements OnInit {
   
   
 
-
+  //join the group method
   async joinGroup(group: Team | undefined) {
     if (group && group.id) {
       const user = await firstValueFrom(this.auth.getCurrentUser());
       if (user && user.uid) {
         try {
+          // Call the joinGroupAndChat method to join the group and chat associated with it
           await this.groupService.joinGroupAndChat(group.id, user.uid);
           console.log('Joined group and chat:', group.groupName);
         } catch (error) {
@@ -117,7 +123,7 @@ export class GroupsPagePage implements OnInit {
     }
   }
 
-
+  // delete group method
   async deleteGroup(group: Team) {
     const currentUser = await firstValueFrom(this.auth.getCurrentUser());
     if (!currentUser || !currentUser.uid) {
@@ -131,6 +137,8 @@ export class GroupsPagePage implements OnInit {
         await this.groupService.deleteGroup(group.id, currentUser.uid);
         console.log('Group deleted successfully');
         this.userGroups = this.userGroups.filter(g => g.id !== group.id);
+        this.fetchGroups();
+        this.fetchUserGroups(); //reload groupds after this is deleted
       } catch (error) {
         console.error('Error deleting group:', error);
       }
@@ -138,19 +146,19 @@ export class GroupsPagePage implements OnInit {
       console.error('Group ID is undefined. Cannot delete group.');
     }
   }
-  
+  //check if the current user is the creator of the group
   isUserGroupCreator(group: Team): boolean {
     console.log(group.creatorId);
     return group.creatorId === this.currentUser?.uid;
   }
   
-
+  //filter groups based on search criteria 
   filterGroups(event: any) {
     const searchTerm = event.detail.value.toLowerCase();
     this.searchPerformed = true; // Indicate a search has been performed
   
     if (!searchTerm.trim()) {
-      this.groups = []; // Option to reset the displayed groups based on your UX choice
+      this.groups = []; // Option to reset the displayed groups 
     } else {
       // Filter allGroups based on the search term, not considering membership
       this.groups = this.allGroups.filter(group => {
@@ -160,7 +168,7 @@ export class GroupsPagePage implements OnInit {
     }
   }
   
-
+  //method for submitting form 
   async onSubmit() {
     if (this.groupForm.valid) {
       const formValue = this.groupForm.value;
@@ -177,8 +185,9 @@ export class GroupsPagePage implements OnInit {
             lastMessage: '',
             creatorId: user.uid
           }, user.uid);
-  
+  `       `
           console.log('Group created with ID:', groupId);
+          this.fetchUserGroups();
         } catch (error) {
           console.error('Error creating group:', error);
         }
@@ -187,12 +196,12 @@ export class GroupsPagePage implements OnInit {
       }
     }
   }
-
+//navigate to specific group page
 async goToGroupPage(group: Team) {
   // Assuming you have a route set up for 'group-detail' page
   this.router.navigate(['/group-detail', { id: group.id }]);
 }
-
+//navigate to home page
 goToHomePage(){
   this.router.navigate(['/home'])
 }

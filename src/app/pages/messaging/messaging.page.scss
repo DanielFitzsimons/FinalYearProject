@@ -9,4 +9,24 @@
     background-color: #f0f0f0; /* Gray background for other user's messages */
     color: #333; /* Dark text color for other user's messages */
   }
+
+  .group-item {
+    padding: 12px;
+    border-bottom: 1px solid #ccc;
+    --ion-item-content-padding-start: 0px; /* To remove the padding inside the item */
+  }
   
+  .group-name {
+    font-weight: bold;
+    display: block; /* Ensure it's a block element so contents below will start on a new line */
+  }
+  
+  .last-message {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px; /* Adjust spacing between group name and last message */
+    display: block; /* This makes sure the last message will appear in a new line under the group name */
+    opacity: 0.6; /* Adjust opacity for faded effect */
+  }
+  
+

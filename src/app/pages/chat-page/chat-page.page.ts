@@ -53,6 +53,13 @@ export class ChatPagePage implements OnInit {
     }
   }
 
+  convertTimestampToDate(timestamp: Date | Timestamp): Date {
+    if (timestamp instanceof Timestamp) {
+      return timestamp.toDate();
+    } else {
+      return timestamp;
+    }
+  }
   
 setCurrentUserId() {
   this.authService.getCurrentUser().subscribe(user => {

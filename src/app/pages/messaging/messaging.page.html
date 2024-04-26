@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="secondary">
     <ion-buttons slot="start">
       <ion-button routerLink="/home">
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
@@ -47,18 +47,16 @@
 
 <div class="ion-padding">
   <h2>My Group Chats</h2>
-  <ion-list>
-    <ion-item *ngFor="let group of groups" (click)="openGroupChat(group)">
-      <ion-label>{{ group.groupName }}</ion-label>
-      <ion-note slot="end">{{ group.lastMessage }}</ion-note>
+  <<ion-list>
+    <ion-item *ngFor="let group of groups" class="group-item" (click)="openGroupChat(group)">
+      <ion-label class="group-name">
+        {{ group.groupName }}
+        <div class="last-message">{{ group.lastMessageContent }}</div>
+      </ion-label>
     </ion-item>
   </ion-list>
-</div> 
-
-
-
-    
   
+</div>
     <!--  
     <ion-list>
       <ion-item *ngFor="let user of users$ | async" (click)="openConversationWithUser(user)">

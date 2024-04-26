@@ -63,7 +63,7 @@ export interface Gym{
     sender: string;
     senderName: string;
     content: string;
-    timestamp: Timestamp;
+    timestamp: Timestamp | Date;
   }
   
  
@@ -71,7 +71,7 @@ export interface Post {
   id?: string; // Optional because Firebase generates the ID
   authorId: string;
   content: string;
-  timestamp: Date | null; // You'll use server timestamps from Firebase
+  timestamp: Date | Timestamp | null; // You'll use server timestamps from Firebase
   groupId: string; // The ID of the group this post belongs to
   userName: string;
   imageUrl: string;
@@ -84,7 +84,10 @@ export interface Post {
     groupDescription?: string;
     members: string[];
     lastMessage: string;
+    lastMessageContent?: string;
+    lastMessageTimestamp?: Date | null
     creatorId?: string;
+    hasNewMessages?: boolean;
   }
 
   export interface RunData {
@@ -146,6 +149,38 @@ export interface Post {
   export interface ListSessionsResponse {
     session: GoogleFitSession[];
     // Add other response properties as needed
+  }
+
+  export interface HeartRateDataPointValue {
+    intVal?: number;
+    fpVal?: number;
+    // Add other possible fields from the data point value
+  }
+  
+  export interface HeartRateDataPoint {
+    startTimeNanos: string;
+    endTimeNanos: string;
+    value: HeartRateDataPointValue[];
+    // Add other fields from the data point if needed
+  }
+  
+  // Define the structure for the expected API response
+  export interface DataSet {
+    point: HeartRateDataPoint[];
+  }
+  
+  export interface DataSetBucket {
+    dataset: DataSet[];
+  }
+  
+  // Define the structure for the expected API response
+  export interface AggregateResponse {
+    bucket: DataSetBucket[];
+  }
+
+  export interface GoogleFitDataSetsResponse {
+    dataset: GoogleFitDataSet[];
+    bucket: GoogleFitDataSetsResponse[];
   }
   
   

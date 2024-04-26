@@ -11,9 +11,9 @@ import { MatDialogRef } from '@angular/material/dialog';
   styleUrls: ['./authenticator.page.scss'],
 })
 export class AuthenticatorPage implements OnInit {
-
+// Enum to define different states of the authenticator component
   state = AuthenticatorCompStart.LOGIN;
-  
+  // Form group for user credentials
   credentials = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -21,12 +21,13 @@ export class AuthenticatorPage implements OnInit {
   });
 
   constructor(
-    private fb:FormBuilder,
+    private fb:FormBuilder, // FormBuilder for creating forms
     private loadingController: LoadingController, // <-- Inject the LoadingController to handle loading state by displaying a spinner
     private alertController: AlertController, // <-- Inject the AlertController to handle errors and display alert messages
     private auth: AuthenticationService, // <-- Inject the AuthService to handle login and registration
     private router: Router, // <-- Inject the Router to redirect after successful login
     //private dialogRef: MatDialogRef<AuthenticatorPage>
+    
   ) { }
 
   ngOnInit() {
@@ -53,9 +54,7 @@ export class AuthenticatorPage implements OnInit {
       '🚀 ~ file: login.page.ts:50 ~ LoginPage ~ register ~ user',
       user
     );
-    // Dismiss the loading spinner
-    
-
+  
     // If the user is successfully created, redirect to the home page. Otherwise, display an error.
     if (user) {
       this.router.navigateByUrl('/profile', { replaceUrl: true });
@@ -75,7 +74,7 @@ export class AuthenticatorPage implements OnInit {
     const user = await this.auth.login(this.credentials.getRawValue());
     // Log the user object to the console. This will be `null` if the user was not logged in.
     console.log('🚀 ~ file: login.page.ts:73 ~ LoginPage ~ login ~ user', user);
-    // Dismiss the loading spinner
+
 
     // If the user is successfully logged in, redirect to the home page. Otherwise, display an error via alert.
     if (user) {
@@ -105,31 +104,31 @@ export class AuthenticatorPage implements OnInit {
 
     //this.dialogRef.close();
   }
-
+ // Change state to forgot password
   forgotPassword(){
     this.state = AuthenticatorCompStart.FORGOT_PASSWORD;
   }
-
+  // Change state to register
   createAccount(){
     this.state = AuthenticatorCompStart.REGISTER;
   }
-
+  // Change state to login
   loginState(){
     this.state = AuthenticatorCompStart.LOGIN;
   }
-
+  // Check if current state is login
   isLoginState(){
     return this.state === AuthenticatorCompStart.LOGIN;
   }
-
+   // Check if current state is register
   isRegisterState(){
     return this.state === AuthenticatorCompStart.REGISTER;
   }
-
+  // Check if current state is forgot password
   isForgotPasswordState(){
     return this.state === AuthenticatorCompStart.FORGOT_PASSWORD;
   }
-
+  // Get text corresponding to current state
   getStateText(){
     switch(this.state){
       case AuthenticatorCompStart.LOGIN:
@@ -140,7 +139,7 @@ export class AuthenticatorPage implements OnInit {
         return "Forgot Password";
     }
   }
-
+  // Display an alert message
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       cssClass: 'top-alert', // Custom CSS class for positioning
@@ -167,9 +166,7 @@ export class AuthenticatorPage implements OnInit {
   
 
 }
-
-
-
+// Enum for defining different states of the authenticator component
 export enum AuthenticatorCompStart{
   LOGIN,
   REGISTER,
