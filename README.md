@@ -7,6 +7,10 @@
 ## Description
 The Social Fitness App is a comprehensive platform designed for the fitness community. It provides a robust and user-friendly platform for community-based fitness tracking and social interaction.
 
+##Video Presentation
+
+https://atlantictu-my.sharepoint.com/:v:/g/personal/g00393110_atu_ie/EbKc99h0IF5LlVIU0JeYsLwBetcCPmkvPliHrJgWUhwIuA?e=5m2sXE&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D
+
 ## Features
 - User Authentication System: Secure login/logout, account creation, and password recovery using Firebase Authentication.
 - Profile Personalization: Users can create personalized profiles and upload profile pictures.
