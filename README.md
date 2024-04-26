@@ -1,6 +1,6 @@
 # Social Fitness App
 
-![Logo of Social Fitness App](src/assets/socialFitnessLogo.png)
+![Logo of Social Fitness App](/socialFitnessLogo.png)
 
 
 ## Description
