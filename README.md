@@ -1,5 +1,7 @@
 # Social Fitness App
 
+![Logo of Social Fitness App](/src/assests/socialFitnesLogo.png)
+
 ## Description
 The Social Fitness App is a comprehensive platform designed for the fitness community. It provides a robust and user-friendly platform for community-based fitness tracking and social interaction.
 
